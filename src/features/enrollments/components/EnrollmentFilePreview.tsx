@@ -141,7 +141,6 @@ export const EnrollmentFilePreview = ({ isOpen, onClose, dni, fullName }: Enroll
     return (
         <Modal isOpen={isOpen} onClose={onClose} title={`Legajo - ${fullName}`} maxWidth="4xl">
             <div className="flex flex-col gap-3 md:gap-5 h-[70vh] md:h-[78vh]">
-                
                 <div className="flex-1 bg-slate-900 rounded-[1.5rem] md:rounded-[2rem] overflow-hidden relative border border-slate-200 group shadow-inner">
                     {isLoading && (
                         <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/95 backdrop-blur-md z-30">

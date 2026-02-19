@@ -116,7 +116,6 @@ export const useReports = (dateRange: string = 'month') => {
         color: REJECTION_COLORS[index % REJECTION_COLORS.length]
     })).filter(item => item.value > 0 || dateRange === 'all');
 
-    // --- Source Statistics (Bot vs Web) ---
     const sourceStats = useMemo(() => filteredEnrollments.reduce((acc: { bot: number; web: number }, curr: Enrollment) => {
         if (!curr.dataSource) acc.bot++;
         else acc.web++;
@@ -127,8 +126,6 @@ export const useReports = (dateRange: string = 'month') => {
         { name: 'Bot WhatsApp', value: sourceStats.bot, color: '#ff8200' },
         { name: 'Formulario Web', value: sourceStats.web, color: '#1e293b' },
     ];
-
-    // --- Quick Stats (KPIs) ---
     const statsGrid = useMemo(() => [
         {
             label: "Total Inscripciones",

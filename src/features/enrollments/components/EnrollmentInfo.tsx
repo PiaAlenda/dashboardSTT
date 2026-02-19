@@ -31,7 +31,7 @@ export const EnrollmentInfo = ({ enrollment, onManageStatus, onReject, onDelete 
     return (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             <div className="md:col-span-2 space-y-4">
-                {/* Header con Acciones de la Imagen */}
+                {/* Header */}
                 <div className="p-6 bg-slate-900 rounded-3xl text-white flex flex-col sm:flex-row items-center justify-between gap-5 shadow-lg">
                     <div className="flex items-center gap-5 min-w-0 w-full">
                         <div className="w-14 h-14 rounded-xl bg-white/10 flex items-center justify-center text-xl font-black shrink-0">
