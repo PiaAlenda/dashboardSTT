@@ -1,4 +1,4 @@
-import { ExternalLink, AlertCircle, Settings2, XCircle, Trash2 } from 'lucide-react'; 
+import { ExternalLink, AlertCircle, Settings2, XCircle, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import type { Enrollment } from '../../../types';
 import { EnrollmentFilePreview } from './EnrollmentFilePreview';
@@ -45,19 +45,19 @@ export const EnrollmentInfo = ({ enrollment, onManageStatus, onReject, onDelete 
 
                     {/* BOTONES DE LA IMAGEN */}
                     <div className="flex items-center gap-2 shrink-0">
-                        <button 
+                        <button
                             onClick={() => onManageStatus?.(enrollment)}
                             className="w-11 h-11 flex items-center justify-center rounded-2xl bg-orange-50 text-orange-500 hover:bg-orange-100 transition-colors border border-orange-100/50"
                         >
                             <Settings2 size={20} />
                         </button>
-                        <button 
+                        <button
                             onClick={() => onReject?.(enrollment)}
                             className="w-11 h-11 flex items-center justify-center rounded-2xl bg-red-50 text-red-500 hover:bg-red-100 transition-colors border border-red-100/50"
                         >
                             <XCircle size={20} />
                         </button>
-                        <button 
+                        <button
                             onClick={() => onDelete?.(enrollment.dni)}
                             className="w-11 h-11 flex items-center justify-center rounded-2xl bg-red-50 text-red-600 hover:bg-red-100 transition-colors border border-red-100/50"
                         >
@@ -90,7 +90,18 @@ export const EnrollmentInfo = ({ enrollment, onManageStatus, onReject, onDelete 
                 )}
 
                 {/* Grilla de Datos Técnicos */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    <div className="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm">
+                        <p className="text-[9px] font-black uppercase text-slate-400 mb-0.5 tracking-wider">Identificación</p>
+                        <p className="text-xs font-bold text-slate-700">DNI: {enrollment.dni}</p>
+                        {enrollment.dniTramite && (
+                            <p className="text-xs font-bold text-slate-700">TRÁMITE: {enrollment.dniTramite}</p>
+                        )}
+                    </div>
+                    <div className="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm">
+                        <p className="text-[9px] font-black uppercase text-slate-400 mb-0.5 tracking-wider">Tipo de Beneficiario</p>
+                        <p className="text-xs font-bold text-slate-700">{enrollment.beneficiaryType || '---'}</p>
+                    </div>
                     <div className="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm">
                         <p className="text-[9px] font-black uppercase text-slate-400 mb-0.5 tracking-wider">Institución Educativa</p>
                         <p className="text-xs font-bold text-slate-700 leading-tight">{enrollment.schoolName || 'No especificada'}</p>
@@ -99,6 +110,14 @@ export const EnrollmentInfo = ({ enrollment, onManageStatus, onReject, onDelete 
                         <p className="text-[9px] font-black uppercase text-slate-400 mb-0.5 tracking-wider">Nivel de Estudios</p>
                         <p className="text-xs font-bold text-slate-700">{enrollment.educationLevel || '---'}</p>
                     </div>
+                    {/*{(enrollment.courseGrade || enrollment.courseDivision) && (
+                        <div className="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm">
+                            <p className="text-[9px] font-black uppercase text-slate-400 mb-0.5 tracking-wider">Curso / División</p>
+                            <p className="text-xs font-bold text-slate-700">
+                                {enrollment.courseGrade || ''} {enrollment.courseDivision || ''}
+                            </p>
+                        </div>
+                    )}*/}
                 </div>
             </div>
 

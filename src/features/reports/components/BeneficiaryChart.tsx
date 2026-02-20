@@ -43,7 +43,7 @@ export const BeneficiaryChart = ({ type, data }: BeneficiaryChartProps) => {
                 </ResponsiveContainer>
             ) : (
                 <ResponsiveContainer width="100%" height={240}>
-                    <BarChart data={chartData}>
+                    <BarChart data={chartData} margin={{ top: 10, right: 10, left: 10, bottom: 10 }}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                         <XAxis
                             dataKey="name"

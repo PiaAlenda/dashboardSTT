@@ -134,7 +134,14 @@ const DetailModal = ({ isOpen, onClose, enrollment, activeTab, setActiveTab, his
                             <h2 className="text-2xl font-black text-slate-800 uppercase tracking-tight">{enrollment.firstName} {enrollment.lastName}</h2>
                             <div className="flex items-center gap-3 mt-1.5">
                                 <StatusBadgeUI status={enrollment.status} />
-                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2 py-1 bg-slate-100 rounded-lg">DNI: {enrollment.dni}</span>
+                                <div className="flex flex-col gap-1">
+                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2 py-1 bg-slate-100 rounded-lg">DNI: {enrollment.dni}</span>
+                                    {enrollment.dniTramite ? (
+                                        <span className="text-[10px] font-black text-[#ff8200] uppercase tracking-widest px-2 py-1 bg-orange-50 rounded-lg border border-orange-200">Tram: {enrollment.dniTramite}</span>
+                                    ) : (
+                                        <span className="text-[9px] font-bold text-slate-300 italic px-2">Sin trámite cargado</span>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -163,8 +170,8 @@ const StatusModal = ({ isOpen, onClose, dni, currentStatus, onUpdateStatus }: St
                 {['PENDIENTE', 'EN_PROCESO', 'APROBADO'].map((status) => (
                     currentStatus.toUpperCase() !== status && (
                         <button key={status} onClick={() => { onUpdateStatus(dni, status); onClose(); }} className={`w-full py-4 rounded-2xl font-black uppercase text-[10px] flex items-center justify-center gap-2 transition-all ${status === 'PENDIENTE' ? 'bg-amber-50 text-amber-600 hover:bg-amber-500 hover:text-white' :
-                                status === 'EN_PROCESO' ? 'bg-blue-50 text-blue-600 hover:bg-blue-500 hover:text-white' :
-                                    'bg-green-50 text-green-600 hover:bg-green-500 hover:text-white'
+                            status === 'EN_PROCESO' ? 'bg-blue-50 text-blue-600 hover:bg-blue-500 hover:text-white' :
+                                'bg-green-50 text-green-600 hover:bg-green-500 hover:text-white'
                             }`}>
                             {status === 'PENDIENTE' ? <Clock size={16} /> : status === 'EN_PROCESO' ? <RefreshCcw size={16} /> : <CheckCircle2 size={16} />}
                             {status.replace('_', ' ')}
@@ -193,7 +200,7 @@ const RejectModal = ({ isOpen, onClose, dni, currentStatus, onConfirm, isSubmitt
                 <div className="space-y-4">
                     <select value={reasonId} onChange={(e) => setReasonId(Number(e.target.value))} className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl text-sm font-bold outline-none focus:border-red-500/50 transition-all">
                         <option value="">-- Seleccionar motivo --</option>
-                        {reasons.filter((r: any) => r.active).map((r: any) => <option key={r.id} value={r.id}>{r.name}</option>)}
+                        {(Array.isArray(reasons) ? reasons : []).filter((r: any) => r.active).map((r: any) => <option key={r.id} value={r.id}>{r.name}</option>)}
                     </select>
                     <textarea value={observation} onChange={(e) => setObservation(e.target.value)} placeholder="Observaciones..." className="w-full min-h-[100px] p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl text-sm font-bold outline-none resize-none" />
                 </div>

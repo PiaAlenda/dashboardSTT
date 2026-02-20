@@ -60,7 +60,7 @@ export const Sidebar: React.FC = () => {
                             <span className="text-[14px] font-black text-slate-800 tracking-tight leading-none">
                                 Dashboard<span className="text-[#ff8400]">STT</span>
                             </span>
-                            <span className="text-[8px] font-bold text-slate-400 uppercase tracking-[0.2em] mt-1">Gestión Vial</span>
+                            <span className="text-[8px] font-bold text-slate-400 uppercase tracking-[0.2em] mt-1">San Juan</span>
                         </div>
                     )}
                 </div>

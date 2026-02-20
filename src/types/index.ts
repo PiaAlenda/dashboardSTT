@@ -38,11 +38,13 @@ export interface Enrollment {
     updatedAt?: string;
     dataSource?: string | null;
     rejectionReasonId?: number;
+    rejectionReason?: string;
     rejectionReasonName?: string;
     observation?: string;
     customField1?: string;
     customField2?: string;
     customField3?: string;
+    dniTramite?: string;
 }
 
 export interface AuthState {

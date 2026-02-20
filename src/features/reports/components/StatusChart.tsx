@@ -42,8 +42,8 @@ export const StatusChart = ({ type, data }: StatusChartProps) => {
                     </PieChart>
                 </ResponsiveContainer>
             ) : (
-                <ResponsiveContainer width="100%" height={240}>
-                    <BarChart data={data} layout="vertical" margin={{ left: 0, right: 0 }}>
+                <ResponsiveContainer width="100%" height={Math.max(300, data.length * 60)}>
+                    <BarChart data={data} layout="vertical" margin={{ left: 0, right: 10, top: 20, bottom: 20 }}>
                         <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
                         <XAxis type="number" hide />
                         <YAxis
@@ -51,7 +51,7 @@ export const StatusChart = ({ type, data }: StatusChartProps) => {
                             type="category"
                             axisLine={false}
                             tickLine={false}
-                            width={100}
+                            width={120}
                             tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: '900' }}
                         />
                         <Tooltip

@@ -8,7 +8,7 @@ export const ChartLegend: React.FC<ChartLegendProps> = ({ data }) => {
     const total = data.reduce((acc, curr) => acc + curr.value, 0);
 
     return (
-        <div className="flex flex-wrap justify-center sm:justify-start gap-x-6 gap-y-3 mb-8 px-2">
+        <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 mb-6 px-1">
             {data.map((item, index) => {
                 const percentage = total > 0 ? ((item.value / total) * 100).toFixed(1) : "0";
                 return (

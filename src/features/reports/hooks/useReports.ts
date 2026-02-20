@@ -97,7 +97,7 @@ export const useReports = (dateRange: string = 'month') => {
     // --- Rejection Reasons Statistics ---
     const rejectionStats = useMemo(() => filteredEnrollments.reduce((acc: Record<string, number>, curr: Enrollment) => {
         if (curr.status?.toUpperCase() === 'RECHAZADO') {
-            let name = curr.rejectionReasonName;
+            let name = curr.rejectionReasonName || curr.rejectionReason;
             const rId = curr.rejectionReasonId || (curr as any).rejection_reason_id;
 
             if (!name && rId) {

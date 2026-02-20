@@ -38,7 +38,7 @@ export const EnrollmentList = ({
                 >
                     {/* CABECERA */}
                     <div className="flex items-start justify-between gap-4 mb-8">
-                        <div className="flex items-center gap-4 min-w-0"> 
+                        <div className="flex items-center gap-4 min-w-0">
                             <div className={`h-14 w-14 rounded-2xl flex items-center justify-center text-white shadow-lg transition-all duration-300 shrink-0
                                 ${selectedEnrollmentId === e.dni ? 'bg-[#ff8200]' : 'bg-slate-900 group-hover:bg-[#ff8200]'}`}>
                                 <UserCircle size={28} />
@@ -64,7 +64,16 @@ export const EnrollmentList = ({
                     <div className="flex items-center justify-between mb-8 pb-6 border-b-2 border-slate-50">
                         <div className="flex flex-col gap-1">
                             <span className="text-[9px] font-black text-slate-300 uppercase tracking-[0.2em]">Identificación</span>
-                            <span className="text-xs font-black text-slate-700 tracking-tight">DNI {e.dni}</span>
+                            <div className="flex flex-col">
+                                <span className="text-xs font-black text-slate-700 tracking-tight">DNI {e.dni}</span>
+                                {e.dniTramite ? (
+                                    <span className="text-xs font-black text-slate-700 tracking-tight">
+                                        TRÁMITE: {e.dniTramite}
+                                    </span>
+                                ) : (
+                                    <span className="text-[9px] font-bold text-slate-300 italic">Sin n° de trámite</span>
+                                )}
+                            </div>
                         </div>
                         <div className="flex flex-col items-end gap-1">
                             <span className="text-[9px] font-black text-slate-300 uppercase tracking-[0.2em]">Categoría</span>
@@ -82,7 +91,7 @@ export const EnrollmentList = ({
                                 <span className="text-[9px] font-black text-red-600 uppercase tracking-widest">Motivo del Rechazo</span>
                             </div>
                             <p className="text-[11px] font-bold text-slate-700 leading-relaxed italic">
-                                {e.rejectionReasonName ? `"${e.rejectionReasonName}"` : 'Sin motivo especificado'}
+                                {e.rejectionReasonName || 'Sin motivo especificado'}
                             </p>
                             {e.observation && (
                                 <p className="mt-2 text-[10px] text-slate-400 font-medium leading-tight">

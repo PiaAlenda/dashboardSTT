@@ -19,8 +19,8 @@ export const RejectionChart = ({ type = 'bar', data }: RejectionChartProps) => {
             {!isEmpty && <ChartLegend data={data} />}
 
             {type === 'pie' ? (
-                <div className="relative w-full h-[240px] flex items-center justify-center">
-                    <ResponsiveContainer width="100%" height="100%">
+                <div className="relative w-full min-h-[240px] flex items-center justify-center">
+                    <ResponsiveContainer width="100%" height={240}>
                         <PieChart>
                             <Pie
                                 data={isEmpty ? [{ name: 'Sin datos', value: 1 }] : data}
@@ -55,8 +55,8 @@ export const RejectionChart = ({ type = 'bar', data }: RejectionChartProps) => {
                     )}
                 </div>
             ) : (
-                <ResponsiveContainer width="100%" height={240}>
-                    <BarChart data={data} layout="vertical" margin={{ left: 10, right: 30 }}>
+                <ResponsiveContainer width="100%" height={Math.max(300, data.length * 50)}>
+                    <BarChart data={data} layout="vertical" margin={{ left: 10, right: 30, top: 20, bottom: 20 }}>
                         <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
                         <XAxis type="number" hide />
                         <YAxis
@@ -64,8 +64,27 @@ export const RejectionChart = ({ type = 'bar', data }: RejectionChartProps) => {
                             type="category"
                             axisLine={false}
                             tickLine={false}
-                            width={100}
-                            tick={{ fill: '#94a3b8', fontSize: 8, fontWeight: 'bold' }}
+                            width={150}
+                            tick={(props) => {
+                                const { x, y, payload } = props;
+                                const text = payload.value.length > 25 ? `${payload.value.substring(0, 22)}...` : payload.value;
+                                return (
+                                    <g transform={`translate(${x},${y})`}>
+                                        <text
+                                            x={0}
+                                            y={0}
+                                            dy={4}
+                                            textAnchor="end"
+                                            fill="#64748b"
+                                            fontSize={10}
+                                            fontWeight="bold"
+                                            className="uppercase tracking-tighter"
+                                        >
+                                            {text}
+                                        </text>
+                                    </g>
+                                );
+                            }}
                         />
                         <Tooltip
                             cursor={{ fill: '#f8fafc' }}

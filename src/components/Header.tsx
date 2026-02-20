@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { UserCircle, LogOut, User as UserIcon, ChevronDown } from 'lucide-react';
+import { UserCircle, LogOut, User as UserIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export const Header: React.FC = () => {
@@ -59,9 +59,6 @@ export const Header: React.FC = () => {
                                     ${isMenuOpen ? 'bg-[#ff8200] scale-95 shadow-orange-200' : 'bg-slate-900 text-white shadow-slate-200 hover:bg-slate-800'}`}
                             >
                                 <UserCircle size={24} />
-                                <div className={`absolute -bottom-1 -right-1 bg-white rounded-full p-0.5 border border-slate-100 transition-transform duration-300 ${isMenuOpen ? 'rotate-180' : ''}`}>
-                                    <ChevronDown size={10} className="text-slate-600" />
-                                </div>
                             </button>
 
                             {isMenuOpen && (

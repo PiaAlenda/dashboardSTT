@@ -46,9 +46,11 @@ export const AnalyticsCard = ({ title, subtitle, children, onExpand }: Analytics
                     </button>
                 </div>
             </div>
-            <div className="flex-1 min-h-[220px] flex items-center justify-center bg-slate-50/30 rounded-[2rem] border border-slate-50 relative overflow-hidden">
+            <div className="flex-1 bg-slate-50/30 rounded-[2rem] border border-slate-50 relative p-4">
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent to-white/10 pointer-events-none" />
-                {children(chartType)}
+                <div className="relative z-10 w-full h-full">
+                    {children(chartType)}
+                </div>
             </div>
         </div>
     );
