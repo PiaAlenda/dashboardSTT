@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom'; // Importamos useNavigate
 import {
     Users,
     LogOut,
@@ -28,6 +28,7 @@ export const NAV_ITEMS: NavItem[] = [
 
 export const Sidebar: React.FC = () => {
     const { logout, user } = useAuth();
+    const navigate = useNavigate(); // Declaramos la función navigate
     const [isCollapsed, setIsCollapsed] = useState(false);
 
     const filteredItems = NAV_ITEMS.filter(item =>
@@ -49,10 +50,16 @@ export const Sidebar: React.FC = () => {
                 >
                     {isCollapsed ? <ChevronRight size={10} /> : <ChevronLeft size={10} />}
                 </button>
+
+                {/* Logo / Header */}
                 <div className={`flex h-20 shrink-0 items-center px-4 transition-all ${isCollapsed ? 'justify-center' : 'gap-3'}`}>
                     <div className="relative shrink-0">
-                        <div className="h-10 w-10 rounded-xl bg-white flex items-center justify-center shadow-lg shadow-slate-200/60 border border-slate-100">
-                            <img src="/favicon.png" alt="Logo" className="h-full w-full object-cover" />
+                        {/* CORRECCIÓN AQUÍ: onClick={() => navigate('/')} */}
+                        <div 
+                            className="h-10 w-10 rounded-xl bg-white flex items-center justify-center shadow-lg shadow-slate-200/60 border border-slate-100 cursor-pointer active:scale-95 transition-transform" 
+                            onClick={() => navigate('/')}
+                        >
+                            <img src="/favicon.png" alt="Logo" className="h-full w-full object-cover p-1" />
                         </div>
                     </div>
                     {!isCollapsed && (
@@ -94,7 +101,7 @@ export const Sidebar: React.FC = () => {
                                     )}
 
                                     {isCollapsed && (
-                                        <div className="absolute left-14 px-3 py-2 bg-slate-900 text-white text-[10px] font-bold uppercase tracking-widest rounded-xl opacity-0 group-hover:opacity-100 transition-all pointer-events-none shadow-2xl z-[70]">
+                                        <div className="absolute left-14 px-3 py-2 bg-slate-900 text-white text-[10px] font-bold uppercase tracking-widest rounded-xl opacity-0 group-hover:opacity-100 transition-all pointer-events-none shadow-2xl z-[70] whitespace-nowrap">
                                             {item.label}
                                         </div>
                                     )}

@@ -1,4 +1,4 @@
-import { ExternalLink, AlertCircle, Settings2, XCircle, Trash2 } from 'lucide-react';
+import { ExternalLink, AlertCircle, Settings2, XCircle } from 'lucide-react';
 import { useState } from 'react';
 import type { Enrollment } from '../../../types';
 import { EnrollmentFilePreview } from './EnrollmentFilePreview';
@@ -59,9 +59,9 @@ export const EnrollmentInfo = ({ enrollment, onManageStatus, onReject, onDelete 
                         </button>
                         <button
                             onClick={() => onDelete?.(enrollment.dni)}
-                            className="w-11 h-11 flex items-center justify-center rounded-2xl bg-red-50 text-red-600 hover:bg-red-100 transition-colors border border-red-100/50"
+                            className="w-11 h-11 flex items-center justify-center rounded-2xl bg-slate-100 text-slate-400 hover:bg-slate-200 transition-colors border border-white shadow-sm"
                         >
-                            <Trash2 size={20} />
+                            <AlertCircle size={20} />
                         </button>
                     </div>
                 </div>

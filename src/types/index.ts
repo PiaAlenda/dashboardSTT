@@ -70,3 +70,23 @@ export interface Claim {
     createdAt: string;
     answeredAt?: string;
 }
+
+export interface Statistics {
+    byStatus: {
+        id: number;
+        name: string;
+        count: number;
+    }[];
+    byShift: {
+        id: number;
+        name: string;
+        count: number;
+    }[];
+    byRoleAndLevel: {
+        beneficiaryTypeId: number;
+        beneficiaryTypeName: string;
+        educationLevelId: number;
+        educationLevelName: string;
+        count: number;
+    }[];
+}

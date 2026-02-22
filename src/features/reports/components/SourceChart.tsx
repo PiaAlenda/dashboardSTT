@@ -14,8 +14,6 @@ export const SourceChart = ({ type, data }: SourceChartProps) => {
 
     return (
         <div className="w-full">
-            <ChartLegend data={chartData} />
-
             {type === 'pie' ? (
                 <ResponsiveContainer width="100%" height={240}>
                     <PieChart>
@@ -62,6 +60,7 @@ export const SourceChart = ({ type, data }: SourceChartProps) => {
                     </BarChart>
                 </ResponsiveContainer>
             )}
+            <ChartLegend data={chartData} />
         </div>
     );
 };

@@ -10,11 +10,13 @@ export const HomePage: React.FC = () => {
       <header className="w-full h-auto min-h-[80px] md:h-24 bg-white border-b border-slate-200 flex flex-col sm:flex-row items-center justify-between px-6 md:px-8 py-4 sm:py-0 shadow-sm gap-4 transition-all">
         {/* Banner */}
         <div className="flex justify-center sm:justify-start">
-          <img
-            src="/stt_banner.png"
-            alt="Secretaría de Tránsito y Transporte"
-            className="h-10 md:h-16 object-contain"
-          />
+          <a href="https://sj.sanjuan.gob.ar/" target="_blank" rel="noopener noreferrer">
+            <img
+              src="/stt_banner.png"
+              alt="Secretaría de Tránsito y Transporte"
+              className="h-10 md:h-16 object-contain"
+            />
+          </a>
         </div>
 
         {/* Botón*/}

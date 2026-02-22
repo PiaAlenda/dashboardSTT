@@ -8,16 +8,12 @@ interface RejectionChartProps {
     data: { name: string; value: number; color: string }[];
 }
 
-
-
 export const RejectionChart = ({ type = 'bar', data }: RejectionChartProps) => {
     const total = data.reduce((acc, curr) => acc + curr.value, 0);
     const isEmpty = total === 0;
 
     return (
         <div className="w-full">
-            {!isEmpty && <ChartLegend data={data} />}
-
             {type === 'pie' ? (
                 <div className="relative w-full min-h-[240px] flex items-center justify-center">
                     <ResponsiveContainer width="100%" height={240}>
@@ -98,6 +94,7 @@ export const RejectionChart = ({ type = 'bar', data }: RejectionChartProps) => {
                     </BarChart>
                 </ResponsiveContainer>
             )}
+            {!isEmpty && <ChartLegend data={data} />}
         </div>
     );
 };

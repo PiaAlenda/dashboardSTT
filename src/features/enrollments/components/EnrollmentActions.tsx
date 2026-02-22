@@ -1,4 +1,4 @@
-import { Eye, Settings2, XCircle, Trash2, RefreshCcw } from 'lucide-react';
+import { Eye, Settings2, XCircle, RefreshCcw, AlertCircle } from 'lucide-react';
 import type { Enrollment } from '../../../types';
 
 interface EnrollmentActionsProps {
@@ -57,9 +57,9 @@ export const EnrollmentActions = ({
                     <button
                         title="Suspender Registro"
                         onClick={() => onDelete(e.dni)}
-                        className={`${btnBase} bg-rose-50 border-rose-100 text-rose-400 hover:bg-rose-600 hover:text-white`}
+                        className={`${btnBase} bg-slate-100 border-slate-200 text-slate-400 hover:bg-slate-500 hover:border-slate-500 hover:text-white transition-all`}
                     >
-                        <Trash2 size={18} strokeWidth={2.5} />
+                        <AlertCircle size={18} strokeWidth={2.5} />
                     </button>
                 </>
             ) : (

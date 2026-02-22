@@ -9,15 +9,11 @@ interface BeneficiaryChartProps {
     data: { name: string; value: number; color?: string }[];
 }
 
-
-
 export const BeneficiaryChart = ({ type, data }: BeneficiaryChartProps) => {
     const chartData = data.map(d => ({ ...d, color: d.color || '#3b82f6' }));
 
     return (
         <div className="w-full">
-            <ChartLegend data={chartData} />
-
             {type === 'pie' ? (
                 <ResponsiveContainer width="100%" height={240}>
                     <PieChart>
@@ -64,6 +60,7 @@ export const BeneficiaryChart = ({ type, data }: BeneficiaryChartProps) => {
                     </BarChart>
                 </ResponsiveContainer>
             )}
+            <ChartLegend data={chartData} />
         </div>
     );
 };

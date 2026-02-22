@@ -4,12 +4,12 @@ import {
 } from 'recharts';
 import { ChartLegend } from './ChartLegend';
 
-interface StatusChartProps {
+interface ShiftChartProps {
     type: 'pie' | 'bar';
     data: { name: string; value: number; color: string }[];
 }
 
-export const StatusChart = ({ type, data }: StatusChartProps) => {
+export const ShiftChart = ({ type, data }: ShiftChartProps) => {
     const total = data.reduce((acc, curr) => acc + curr.value, 0);
 
     return (
@@ -34,7 +34,7 @@ export const StatusChart = ({ type, data }: StatusChartProps) => {
                         <Tooltip
                             contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
                             itemStyle={{ fontWeight: '900', fontSize: '11px' }}
-                            formatter={(value: number | undefined) => [`${value ?? 0} (${total > 0 && typeof value === 'number' ? ((value / total) * 100).toFixed(1) : "0"}%)`, 'Cantidad']}
+                            formatter={(value: number | undefined) => [`${value ?? 0} (${total > 0 && typeof value === 'number' ? ((value / total) * 100).toFixed(1) : "0"}%)`, 'Inscripciones']}
                         />
                     </PieChart>
                 </ResponsiveContainer>

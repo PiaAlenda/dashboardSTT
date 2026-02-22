@@ -1,8 +1,19 @@
-import { useState } from 'react';
-import { Lock, UserCircle, Briefcase, Eye, EyeOff, Fingerprint, AtSign, ShieldCheck, X, BadgeCheck, AlertCircle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { 
+    Lock, UserCircle, Briefcase, Eye, EyeOff, Fingerprint, 
+    AtSign, ShieldCheck, X, BadgeCheck, AlertCircle 
+} from 'lucide-react';
 import { Modal } from '../../../components/ui/Modal';
 
-const FloatingInput = ({ label, icon: Icon, error, type = "text", showPasswordToggle, onTogglePassword, isPasswordVisible, success, ...props }: any) => {
+/**
+ * COMPONENTE: FloatingInput
+ * Maneja la etiqueta flotante y los estados de error/éxito visualmente.
+ */
+const FloatingInput = ({ 
+    label, icon: Icon, error, type = "text", 
+    showPasswordToggle, onTogglePassword, isPasswordVisible, 
+    success, ...props 
+}: any) => {
     return (
         <div className="flex flex-col w-full group">
             <div className="relative">
@@ -24,9 +35,9 @@ const FloatingInput = ({ label, icon: Icon, error, type = "text", showPasswordTo
                 </label>
 
                 <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
-                    {success && !error && <BadgeCheck size={16} className="text-green-500" />}
+                    {success && !error && <BadgeCheck size={16} className="text-green-500 animate-in zoom-in" />}
                     {showPasswordToggle && (
-                        <button type="button" onClick={onTogglePassword} className="text-slate-400 hover:text-slate-600 p-1">
+                        <button type="button" onClick={onTogglePassword} className="text-slate-400 hover:text-slate-600 p-1 transition-colors">
                             {isPasswordVisible ? <EyeOff size={16} /> : <Eye size={16} />}
                         </button>
                     )}
@@ -34,6 +45,7 @@ const FloatingInput = ({ label, icon: Icon, error, type = "text", showPasswordTo
                 </div>
             </div>
 
+            {/* Mensaje de Error Animado */}
             <div className={`overflow-hidden transition-all duration-300 ${error ? 'max-h-10 mt-1' : 'max-h-0'}`}>
                 <div className="flex items-center gap-1.5 px-1">
                     <AlertCircle size={10} className="text-red-500" />
@@ -44,6 +56,9 @@ const FloatingInput = ({ label, icon: Icon, error, type = "text", showPasswordTo
     );
 };
 
+/**
+ * COMPONENTE: UserCreateForm
+ */
 export const UserCreateForm = ({ isOpen, onClose, formData, setFormData, onSubmit, isSubmitting }: any) => {
     const [showPass, setShowPass] = useState(false);
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -51,24 +66,93 @@ export const UserCreateForm = ({ isOpen, onClose, formData, setFormData, onSubmi
 
     const passwordsMatch = formData.password && formData.password === confirmPassword;
 
+    /**
+     * RESET: Limpia todos los campos y errores al cerrar
+     */
+    const handleCloseReset = () => {
+        setErrors({});
+        setConfirmPassword('');
+        setShowPass(false);
+        setFormData({
+            firstName: '',
+            lastName: '',
+            dni: '',
+            username: '',
+            email: '',
+            password: '',
+            role: 'ROLE_AUDITOR'
+        });
+        onClose();
+    };
+
+    /**
+     * EFECTO: Asegura la limpieza si el modal se cierra por otros medios (ESC, click fuera)
+     */
+    useEffect(() => {
+        if (!isOpen) {
+            setErrors({});
+            setConfirmPassword('');
+            setShowPass(false);
+        }
+    }, [isOpen]);
+
+    /**
+     * DNI: Solo permite números y máximo 8 caracteres
+     */
+    const handleDniChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const val = e.target.value.replace(/\D/g, ''); 
+        if (val.length <= 8) {
+            setFormData({ ...formData, dni: val });
+        }
+    };
+
+    /**
+     * VALIDACIÓN: Lógica de seguridad estricta
+     */
     const validate = () => {
         const e: any = {};
-        if (!formData.firstName) e.firstName = 'Requerido';
-        if (!formData.lastName) e.lastName = 'Requerido';
-        if (!formData.dni) e.dni = 'Obligatorio';
-        if (!formData.email?.includes('@')) e.email = 'Email Inválido';
-        if (formData.password?.length < 6) e.password = 'Muy corta';
-        if (!passwordsMatch) e.confirmPassword = 'No coinciden';
+        
+        if (!formData.firstName?.trim()) e.firstName = 'Requerido';
+        if (!formData.lastName?.trim()) e.lastName = 'Requerido';
+        
+        // Validación DNI: 7 u 8 números
+        if (!/^\d{7,8}$/.test(formData.dni)) {
+            e.dni = 'Requiere 7 u 8 números';
+        }
+
+        // Validación Email: Formato correcto con @
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(formData.email)) {
+            e.email = 'Email Inválido (Ej: usuario@mail.com)';
+        }
+
+        // Validación Password: Mínimo 8
+        if (!formData.password || formData.password.length < 8) {
+            e.password = 'Mínimo 8 caracteres';
+        }
+
+        // Coincidencia de Password
+        if (!passwordsMatch) {
+            e.confirmPassword = 'Las contraseñas no coinciden';
+        }
+
         setErrors(e);
         return Object.keys(e).length === 0;
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title="Alta de Personal" maxWidth="4xl">
-            <form className="p-1 md:p-2" onSubmit={(e) => { e.preventDefault(); if (validate()) onSubmit(e); }} autoComplete="off">
+        <Modal isOpen={isOpen} onClose={handleCloseReset} title="Alta de Personal" maxWidth="4xl">
+            <form 
+                className="p-1 md:p-2" 
+                onSubmit={(e) => { 
+                    e.preventDefault(); 
+                    if (validate()) onSubmit(e); 
+                }} 
+                autoComplete="off"
+            >
                 <div className="flex flex-col md:grid md:grid-cols-12 gap-6 items-stretch">
 
-                    {/* SECCIÓN DATOS */}
+                    {/* SECCIÓN DATOS PERSONALES */}
                     <div className="md:col-span-7 space-y-4 py-2 md:py-6">
                         <div className="flex items-center gap-2 mb-2 md:hidden">
                             <UserCircle size={18} className="text-[#ff8200]" />
@@ -78,43 +162,45 @@ export const UserCreateForm = ({ isOpen, onClose, formData, setFormData, onSubmi
                         <div className="grid grid-cols-2 gap-3">
                             <FloatingInput
                                 label="Nombre"
-                                value={formData.firstName}
+                                value={formData.firstName || ''}
                                 error={errors.firstName}
                                 onChange={(e: any) => setFormData({ ...formData, firstName: e.target.value })}
                             />
                             <FloatingInput
                                 label="Apellido"
-                                value={formData.lastName}
+                                value={formData.lastName || ''}
                                 error={errors.lastName}
                                 onChange={(e: any) => setFormData({ ...formData, lastName: e.target.value })}
                             />
                         </div>
 
                         <FloatingInput
-                            label="DNI / Documento"
+                            label="DNI / Solo Números"
                             icon={Fingerprint}
-                            value={formData.dni}
+                            inputMode="numeric"
+                            value={formData.dni || ''}
                             error={errors.dni}
-                            onChange={(e: any) => setFormData({ ...formData, dni: e.target.value })}
+                            onChange={handleDniChange}
                         />
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <FloatingInput
                                 label="Usuario"
-                                value={formData.username}
+                                value={formData.username || ''}
                                 onChange={(e: any) => setFormData({ ...formData, username: e.target.value })}
                             />
                             <FloatingInput
                                 label="Email"
                                 icon={AtSign}
-                                value={formData.email}
+                                type="email"
+                                value={formData.email || ''}
                                 error={errors.email}
                                 onChange={(e: any) => setFormData({ ...formData, email: e.target.value })}
                             />
                         </div>
                     </div>
 
-                    {/* SECCIÓN SEGURIDAD */}
+                    {/* SECCIÓN SEGURIDAD (FONDO OSCURO) */}
                     <div className="md:col-span-5 bg-slate-900 rounded-[2rem] md:rounded-[2.5rem] p-5 md:p-8 text-white flex flex-col shadow-xl">
                         <div className="flex items-center gap-3 border-b border-white/10 pb-4 mb-6">
                             <div className="p-2 bg-orange-500 rounded-lg shrink-0">
@@ -130,13 +216,13 @@ export const UserCreateForm = ({ isOpen, onClose, formData, setFormData, onSubmi
                                 showPasswordToggle
                                 isPasswordVisible={showPass}
                                 onTogglePassword={() => setShowPass(!showPass)}
-                                value={formData.password}
+                                value={formData.password || ''}
                                 error={errors.password}
                                 onChange={(e: any) => setFormData({ ...formData, password: e.target.value })}
                             />
 
                             <FloatingInput
-                                label="Confirmar"
+                                label="Confirmar Contraseña"
                                 type="password"
                                 success={passwordsMatch}
                                 error={errors.confirmPassword}
@@ -163,12 +249,12 @@ export const UserCreateForm = ({ isOpen, onClose, formData, setFormData, onSubmi
                     </div>
                 </div>
 
-                {/* BOTONES ACCIÓN */}
+                {/* BOTONERA DE ACCIÓN */}
                 <div className="flex flex-col sm:flex-row items-center justify-between mt-8 border-t border-slate-100 pt-6 gap-4">
                     <button
                         type="button"
-                        onClick={onClose}
-                        className="order-2 sm:order-1 flex items-center gap-2 text-[10px] font-black uppercase text-slate-400 hover:text-red-500 transition-all"
+                        onClick={handleCloseReset}
+                        className="order-2 sm:order-1 flex items-center gap-2 text-[10px] font-black uppercase text-slate-400 hover:text-red-500 transition-all active:scale-95"
                     >
                         <X size={16} /> Descartar Cambios
                     </button>
@@ -176,7 +262,7 @@ export const UserCreateForm = ({ isOpen, onClose, formData, setFormData, onSubmi
                     <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="order-1 sm:order-2 w-full sm:w-auto bg-[#ff8200] hover:bg-slate-800 text-white px-10 py-4 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all shadow-lg shadow-orange-200 flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50"
+                        className="order-1 sm:order-2 w-full sm:w-auto bg-[#ff8200] hover:bg-slate-800 text-white px-10 py-4 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all shadow-lg shadow-orange-200 flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50 disabled:grayscale"
                     >
                         {isSubmitting ? 'Procesando...' : 'Confirmar Alta'}
                         <ShieldCheck size={18} />

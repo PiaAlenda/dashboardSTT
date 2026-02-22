@@ -23,12 +23,14 @@ export const Header: React.FC = () => {
         <header className="flex h-20 lg:h-20 border-b border-slate-200 bg-white/80 backdrop-blur-md sticky top-0 z-40 px-4 md:px-8 2xl:px-12">
             <div className="flex h-full items-center justify-between max-w-[1600px] mx-auto w-full">
                 <div className="flex items-center h-full py-4">
-                    <div className="relative h-full flex items-center group cursor-pointer" onClick={() => navigate('/')}>
-                        <img 
-                            src="/stt_banner.png" 
-                            alt="Banner Institucional"
-                            className="h-full w-auto object-contain transition-transform duration-300 group-hover:scale-[1.01]"
-                        />
+                    <div className="relative h-full flex items-center group cursor-pointer">
+                        <a className='relative h-full flex items-center group cursor-pointer' href="https://sj.sanjuan.gob.ar/" target="_blank" rel="noopener noreferrer">
+                            <img
+                                src="/stt_banner.png"
+                                alt="Banner Institucional"
+                                className="h-full w-auto object-contain transition-transform duration-300 group-hover:scale-[1.01]"
+                            />
+                        </a>
                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_2s_infinite] pointer-events-none" />
                     </div>
                 </div>

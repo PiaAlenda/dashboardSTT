@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import {
     Settings2, Clock, RefreshCcw, CheckCircle2,
-    XCircle, X, Trash2
+    XCircle, X, AlertCircle, Ban
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { Modal } from '../../../components/ui/Modal';
@@ -117,8 +117,6 @@ export const EnrollmentModals = ({ state, actions }: EnrollmentModalsProps) => {
     );
 };
 
-// --- SUB-COMPONENTES PRIVADOS ---
-
 const DetailModal = ({ isOpen, onClose, enrollment, activeTab, setActiveTab, history, loadingHistory, onManageStatus, onReject, onDelete }: DetailModalProps) => {
     if (!isOpen || !enrollment) return null;
     return (
@@ -167,13 +165,17 @@ const StatusModal = ({ isOpen, onClose, dni, currentStatus, onUpdateStatus }: St
         <div className="text-center">
             <div className="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6"><Settings2 size={32} /></div>
             <div className="flex flex-col gap-3">
-                {['PENDIENTE', 'EN_PROCESO', 'APROBADO'].map((status) => (
+                {['PENDIENTE', 'EN_PROCESO', 'APROBADO', 'CANCELADO'].map((status) => (
                     currentStatus.toUpperCase() !== status && (
                         <button key={status} onClick={() => { onUpdateStatus(dni, status); onClose(); }} className={`w-full py-4 rounded-2xl font-black uppercase text-[10px] flex items-center justify-center gap-2 transition-all ${status === 'PENDIENTE' ? 'bg-amber-50 text-amber-600 hover:bg-amber-500 hover:text-white' :
-                            status === 'EN_PROCESO' ? 'bg-blue-50 text-blue-600 hover:bg-blue-500 hover:text-white' :
-                                'bg-green-50 text-green-600 hover:bg-green-500 hover:text-white'
+                                status === 'EN_PROCESO' ? 'bg-blue-50 text-blue-600 hover:bg-blue-500 hover:text-white' :
+                                    status === 'CANCELADO' ? 'bg-slate-100 text-slate-500 hover:bg-slate-600 hover:text-white' :
+                                        'bg-green-50 text-green-600 hover:bg-green-500 hover:text-white'
                             }`}>
-                            {status === 'PENDIENTE' ? <Clock size={16} /> : status === 'EN_PROCESO' ? <RefreshCcw size={16} /> : <CheckCircle2 size={16} />}
+                            {status === 'PENDIENTE' ? <Clock size={16} /> :
+                                status === 'EN_PROCESO' ? <RefreshCcw size={16} /> :
+                                    status === 'CANCELADO' ? <Ban size={16} /> :
+                                        <CheckCircle2 size={16} />}
                             {status.replace('_', ' ')}
                         </button>
                     )
@@ -216,7 +218,7 @@ const RejectModal = ({ isOpen, onClose, dni, currentStatus, onConfirm, isSubmitt
 const DeleteModal = ({ isOpen, onClose, dni, onConfirm }: DeleteModalProps) => (
     <Modal isOpen={isOpen} onClose={onClose} title="¿Suspender solicitud?" maxWidth="sm">
         <div className="text-center">
-            <div className="w-20 h-20 bg-slate-900 text-white rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-xl"><Trash2 size={40} /></div>
+            <div className="w-20 h-20 bg-slate-900 text-white rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-xl"><AlertCircle size={40} /></div>
             <p className="text-xs text-slate-400 mb-8 max-w-[280px] mx-auto">El registro se moverá a la papelera. Podrás recuperarlo desde el filtro "Suspendidas".</p>
             <div className="flex gap-3">
                 <button onClick={onClose} className="flex-1 py-4 rounded-2xl bg-slate-100 font-black text-slate-400 uppercase text-[10px]">Volver</button>

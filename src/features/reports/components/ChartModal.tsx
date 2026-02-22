@@ -72,7 +72,7 @@ export const ChartModal = ({ isOpen, onClose, title, children, data }: ChartModa
                         onClick={onClose}
                         className="px-6 py-2.5 bg-slate-900 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-[#ff8200] transition-all shadow-lg shadow-slate-200"
                     >
-                        Cerrar Monitor
+                        Cerrar
                     </button>
                 </div>
             </div>

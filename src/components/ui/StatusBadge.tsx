@@ -12,7 +12,7 @@ export const StatusBadge = ({ status, isDeleted, className = '' }: StatusBadgePr
 
     if (isDeleted) return (
         <span className={`${baseStyle} border-red-200 bg-red-50 text-red-600`}>
-            <Trash2 size={14} strokeWidth={3} /> 
+            <Trash2 size={14} strokeWidth={3} />
         </span>
     );
 
@@ -21,16 +21,16 @@ export const StatusBadge = ({ status, isDeleted, className = '' }: StatusBadgePr
         'APROBADO': { style: "bg-green-50 text-green-700 border-green-200", icon: CheckCircle2, label: '' },
         'PENDIENTE': { style: "bg-amber-50 text-amber-700 border-amber-200", icon: Clock, label: '' },
         'RECHAZADO': { style: "bg-red-50 text-red-700 border-red-200", icon: XCircle, label: '' },
-        'CANCELADO': { style: "bg-slate-50 text-slate-500 border-slate-200", icon: Ban, label: '' },
+        'CANCELADO': { style: "bg-slate-100 text-slate-500 border-slate-300", icon: Ban, label: '' },
         'EN_PROCESO': { style: "bg-blue-50 text-blue-700 border-blue-200", icon: RefreshCcw, label: '' },
         'SUSPENDIDA': { style: "bg-purple-50 text-purple-700 border-purple-200", icon: ShieldCheck, label: '' }
     };
 
     const active = config[s] || { style: "bg-slate-50 text-slate-700 border-slate-200", icon: Clock, label: s || 'Desconocido' };
-    
+
     return (
         <span className={`${baseStyle} ${active.style} ${className}`}>
-            <active.icon size={14} strokeWidth={3} /> 
+            <active.icon size={14} strokeWidth={3} />
             {active.label}
         </span>
     );

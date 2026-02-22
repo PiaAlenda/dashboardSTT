@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { BarChart3, Calendar } from 'lucide-react';
 import { AnalyticsCard } from '../features/reports/components/AnalyticsCard';
-import { SourceChart } from '../features/reports/components/SourceChart';
 import { StatusChart } from '../features/reports/components/StatusChart';
 import { BeneficiaryChart } from '../features/reports/components/BeneficiaryChart';
+import { ShiftChart } from '../features/reports/components/ShiftChart';
+import { LevelChart } from '../features/reports/components/LevelChart';
+import { SourceChart } from '../features/reports/components/SourceChart';
 import { RejectionChart } from '../features/reports/components/RejectionChart';
 import { ChartModal } from '../features/reports/components/ChartModal';
 import { useReports } from '../features/reports/hooks/useReports';
@@ -40,7 +42,7 @@ const DateFilter = ({ selected, onChange }: { selected: string; onChange: (val: 
 export const ReportsPage = () => {
     const [expandedChart, setExpandedChart] = useState<{ title: string; component: React.ReactNode; data: any[] } | null>(null);
     const [dateRange, setDateRange] = useState('month');
-    const { charts, isLoading } = useReports(dateRange);
+    const { charts, statsGrid, isLoading } = useReports(dateRange);
 
     if (isLoading) {
         return <LoadingOverlay message="Generando Reportes Estadísticos..." />;
@@ -68,7 +70,7 @@ export const ReportsPage = () => {
                             Panel de <span className="text-[#ff8200]">Analíticas</span>
                         </h1>
                         <p className="text-[11px] 2xl:text-sm font-bold text-slate-400 uppercase tracking-widest mt-1">
-                            Métricas operativas en tiempo real
+                            Métricas operativas consolidadas
                         </p>
                     </div>
                 </div>
@@ -78,23 +80,44 @@ export const ReportsPage = () => {
                 </div>
             </header>
 
+            {/* DASHBOARD DATA (Stats Grid) */}
+            <section className="px-4 pt-10 border-t border-slate-50">
+                <div className="flex flex-col items-center mb-8">
+                    <h2 className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] select-none">
+                        Resumen de Métricas
+                    </h2>
+                </div>
+                <div className="flex gap-4 overflow-x-auto pb-6 scrollbar-hide snap-x snap-mandatory lg:justify-center hide-scrollbar">
+                    {statsGrid.map((stat) => (
+                        <div
+                            key={stat.label}
+                            className="group relative bg-white p-6 rounded-[1.2rem] border border-slate-100 
+                           min-w-[180px] md:min-w-[210px] shrink-0 snap-center
+                           shadow-sm overflow-hidden
+                           hover:-translate-y-1.5 hover:shadow-md hover:border-orange-100
+                           transition-all duration-200 ease-out will-change-transform"
+                        >
+                            <div className="absolute top-0 left-0 w-[5px] h-full bg-[#ff8200] transform-gpu" />
+
+                            <div className="flex flex-col items-center text-center">
+                                <span className="text-[9px] font-black uppercase text-[#ff8200] tracking-widest mb-1 select-none">
+                                    {stat.label}
+                                </span>
+                                <span className="text-3xl font-black tracking-tighter text-slate-800 leading-none">
+                                    {stat.value}
+                                </span>
+                                <div className="w-6 h-[1.5px] bg-slate-50 mt-3 rounded-full" />
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </section>
+            
             {/* GRILLA DE GRÁFICOS (Charts) */}
             <section className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8 px-2">
                 <AnalyticsCard
-                    title="Fuente de Ingreso"
-                    subtitle={`Periodo seleccionado: ${dateRange}`}
-                    onExpand={() => setExpandedChart({
-                        title: "Fuente de Ingreso",
-                        component: <SourceChart type="bar" data={charts.source} />,
-                        data: charts.source
-                    })}
-                >
-                    {(type) => <SourceChart type={type} data={charts.source} />}
-                </AnalyticsCard>
-
-                <AnalyticsCard
                     title="Estado de Solicitudes"
-                    subtitle="Distribución actual del padrón"
+                    subtitle="Distribución por estado administrativo"
                     onExpand={() => setExpandedChart({
                         title: "Estado de Solicitudes",
                         component: <StatusChart type="bar" data={charts.status} />,
@@ -105,8 +128,32 @@ export const ReportsPage = () => {
                 </AnalyticsCard>
 
                 <AnalyticsCard
+                    title="Distribución por Turno"
+                    subtitle="Inscripciones según horario escolar"
+                    onExpand={() => setExpandedChart({
+                        title: "Distribución por Turno",
+                        component: <ShiftChart type="bar" data={charts.shift} />,
+                        data: charts.shift
+                    })}
+                >
+                    {(type) => <ShiftChart type={type} data={charts.shift} />}
+                </AnalyticsCard>
+
+                <AnalyticsCard
+                    title="Fuente de Ingreso"
+                    subtitle="Canal de origen de la solicitud"
+                    onExpand={() => setExpandedChart({
+                        title: "Fuente de Ingreso",
+                        component: <SourceChart type="bar" data={charts.source} />,
+                        data: charts.source
+                    })}
+                >
+                    {(type) => <SourceChart type={type} data={charts.source} />}
+                </AnalyticsCard>
+
+                <AnalyticsCard
                     title="Tipos de Beneficiario"
-                    subtitle="Perfil del universo estudiantil"
+                    subtitle="Perfil por rol (Estudiante/Docente)"
                     onExpand={() => setExpandedChart({
                         title: "Tipos de Beneficiario",
                         component: <BeneficiaryChart type="bar" data={charts.beneficiary} />,
@@ -116,19 +163,29 @@ export const ReportsPage = () => {
                     {(type) => <BeneficiaryChart type={type} data={charts.beneficiary} />}
                 </AnalyticsCard>
 
-                <div className="lg:col-span-2 xl:col-span-3">
-                    <AnalyticsCard
-                        title="Motivos de Rechazo"
-                        subtitle="Causas principales identificadas"
-                        onExpand={() => setExpandedChart({
-                            title: "Motivos de Rechazo",
-                            component: <RejectionChart type="bar" data={charts.rejection} />,
-                            data: charts.rejection
-                        })}
-                    >
-                        {(type) => <RejectionChart type={type} data={charts.rejection} />}
-                    </AnalyticsCard>
-                </div>
+                <AnalyticsCard
+                    title="Nivel Educativo"
+                    subtitle="Distribución por niveles de enseñanza"
+                    onExpand={() => setExpandedChart({
+                        title: "Nivel Educativo",
+                        component: <LevelChart type="bar" data={charts.level} />,
+                        data: charts.level
+                    })}
+                >
+                    {(type) => <LevelChart type={type} data={charts.level} />}
+                </AnalyticsCard>
+
+                <AnalyticsCard
+                    title="Motivos de Rechazo"
+                    subtitle="Causas principales identificadas"
+                    onExpand={() => setExpandedChart({
+                        title: "Motivos de Rechazo",
+                        component: <RejectionChart type="bar" data={charts.rejection} />,
+                        data: charts.rejection
+                    })}
+                >
+                    {(type) => <RejectionChart type={type} data={charts.rejection} />}
+                </AnalyticsCard>
             </section>
         </div>
     );

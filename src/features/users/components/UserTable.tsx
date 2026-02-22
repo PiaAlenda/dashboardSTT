@@ -1,4 +1,4 @@
-import { Mail, Clock, RotateCcw, Trash2, User as UserIcon, MoreVertical, Fingerprint } from 'lucide-react';
+import { Mail, Clock, RotateCcw, Trash2, User as UserIcon, Fingerprint } from 'lucide-react';
 
 interface UserTableProps {
     users: any[];
@@ -21,7 +21,8 @@ export const UserTable = ({
 }: UserTableProps) => {
     return (
         <div className="space-y-6">
-            {/* Header */}
+            
+            {/* --- HEADER --- */}
             <div className="flex justify-between items-center bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
                 <h2 className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 flex items-center gap-2">
                     <UserIcon size={14} className="text-[#ff8200]" /> 
@@ -44,32 +45,33 @@ export const UserTable = ({
                 </label>
             </div>
 
-            {/* Grid de Cards */}
+            {/* --- GRID DE CARDS --- */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
                 {users.map((u) => (
                     <div 
                         key={u.id} 
-                        className={`relative p-6 rounded-[2.5rem] border transition-all duration-300 bg-white border-1 border-orange-300
+                        className={`relative p-6 rounded-[2.5rem] border transition-all duration-300 bg-white
                             ${u.deleted 
-                                ? 'border-red-100 bg-red-50/30' 
-                                : 'border-slate-100 hover:border-orange-200 hover:-translate-y-1 hover:shadow-xl hover:shadow-orange-500/50'}`}
+                                ? 'border-red-100 bg-red-50/30 grayscale opacity-80' 
+                                : 'border-slate-100 hover:border-orange-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-orange-500/10'}`}
                     >
                         {u.deleted && (
-                            <div className="absolute top-5 right-5">
-                                <span className="bg-red-500 text-white text-[7px] font-black uppercase px-2 py-0.5 rounded-lg shadow-sm">Archivado</span>
+                            <div className="absolute top-6 right-6">
+                                <span className="bg-red-500 text-white text-[7px] font-black uppercase px-2 py-0.5 rounded-lg shadow-sm tracking-widest">Archivado</span>
                             </div>
                         )}
 
-                        <div className="flex flex-col items-center text-center space-y-3">
-                            <div className={`relative h-14 w-14 flex items-center justify-center rounded-2xl font-black text-lg transition-transform group-hover:scale-105
-                                ${u.deleted ? 'bg-red-100 text-red-400' : 'bg-slate-900 text-white shadow-lg shadow-slate-200'}`}>
+                        <div className="flex flex-col items-center text-center space-y-4">
+                            {/* Avatar */}
+                            <div className={`relative h-16 w-16 flex items-center justify-center rounded-[1.5rem] font-black text-xl transition-transform
+                                ${u.deleted ? 'bg-red-100 text-red-400' : 'bg-slate-900 text-white shadow-xl shadow-slate-200'}`}>
                                 {u.firstName?.charAt(0)}
                                 {!u.deleted && (
-                                    <div className="absolute -bottom-0.5 -right-0.5 h-4 w-4 bg-green-500 border-2 border-white rounded-full" />
+                                    <div className="absolute -bottom-1 -right-1 h-5 w-5 bg-green-500 border-4 border-white rounded-full" />
                                 )}
                             </div>
 
-                            {/* Información Principal */}
+                            {/* Info Principal */}
                             <div className="space-y-1">
                                 <h3 className={`font-black uppercase tracking-tight text-[13px] leading-tight
                                     ${u.deleted ? 'text-red-800' : 'text-slate-800'}`}>
@@ -77,9 +79,9 @@ export const UserTable = ({
                                 </h3>
                                 <div className="flex flex-col items-center gap-1.5">
                                     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-widest
-                                        ${u.role === 'ROLE_SUPER_ADMIN' ? 'bg-orange-100/50 text-orange-600' : 
-                                          u.role === 'ROLE_ADMIN' ? 'bg-purple-100/50 text-purple-600' : 
-                                          'bg-blue-100/50 text-blue-600'}`}>
+                                        ${u.role === 'ROLE_SUPER_ADMIN' ? 'bg-orange-100 text-orange-600' : 
+                                          u.role === 'ROLE_ADMIN' ? 'bg-purple-100 text-purple-600' : 
+                                          'bg-blue-100 text-blue-600'}`}>
                                         {u.role?.replace('ROLE_', '')}
                                     </span>
                                     <span className="text-[9px] font-bold text-slate-400 flex items-center gap-1">
@@ -89,44 +91,41 @@ export const UserTable = ({
                             </div>
 
                             {/* Info de contacto */}
-                            <div className="w-full bg-slate-50/80 p-2.5 rounded-2xl border border-slate-100">
-                                <div className="flex items-center justify-center gap-2 text-[9px] font-bold text-slate-500 truncate">
-                                    <Mail size={11} className="text-orange-400" />
+                            <div className="w-full bg-slate-50 p-3 rounded-[1.5rem] border border-slate-100 group">
+                                <div className="flex items-center justify-center gap-2 text-[9px] font-black text-slate-500 truncate lowercase">
+                                    <Mail size={12} className="text-[#ff8200]" />
                                     {u.email}
                                 </div>
                             </div>
 
                             {/* Acciones */}
-                            <div className="flex items-center gap-1 pt-1 w-full justify-center">
+                            <div className="flex items-center gap-2 pt-1 w-full justify-center">
                                 {isSuperAdmin && (
-                                    <div className="flex items-center gap-1.5 bg-white p-1 rounded-xl border border-slate-100 shadow-sm">
+                                    <div className="flex items-center gap-1 bg-white p-1 rounded-[1.2rem] border border-slate-100 shadow-sm">
                                         <button
                                             onClick={() => onViewHistory(u.dni)}
-                                            className="p-1.5 text-slate-400 hover:text-orange-500 transition-all"
+                                            className="p-2 text-slate-400 hover:text-[#ff8200] hover:bg-orange-50 rounded-xl transition-all"
                                         >
-                                            <Clock size={15} />
+                                            <Clock size={16} />
                                         </button>
 
                                         {u.deleted ? (
                                             <button
                                                 onClick={() => onReactivate(u.dni)}
-                                                className="p-1.5 bg-green-500 rounded-lg text-white hover:bg-green-600 transition-all shadow-sm"
+                                                className="p-2 bg-green-500 rounded-xl text-white hover:bg-slate-900 transition-all shadow-md"
                                             >
-                                                <RotateCcw size={15} />
+                                                <RotateCcw size={16} />
                                             </button>
                                         ) : (
                                             <button
-                                                onClick={() => { if (confirm('¿Eliminar?')) onDelete(u.dni) }}
-                                                className="p-1.5 text-slate-400 hover:text-red-500 transition-all"
+                                                onClick={() => onDelete(u.dni)} // Acción directa sin alert ni modal local
+                                                className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
                                             >
-                                                <Trash2 size={15} />
+                                                <Trash2 size={16} />
                                             </button>
                                         )}
                                     </div>
                                 )}
-                                <button className="p-1.5 text-slate-300 hover:text-slate-800 transition-colors">
-                                    <MoreVertical size={15} />
-                                </button>
                             </div>
                         </div>
                     </div>
