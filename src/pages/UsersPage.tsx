@@ -12,6 +12,7 @@ export const UsersPage: React.FC = () => {
         users, isLoading,
         searchTerm, setSearchTerm,
         isModalOpen, setIsModalOpen,
+        isEditMode, handleCloseModal,
         historyUserDni, setHistoryUserDni,
         dniToDelete, setDniToDelete,
         showDeleted, setShowDeleted,
@@ -21,7 +22,9 @@ export const UsersPage: React.FC = () => {
         deleteMutation,
         reactivateMutation,
         handleSubmit,
-        createMutation
+        createMutation,
+        updateMutation,
+        handleEdit
     } = useUsers();
 
     if (isLoading) {
@@ -30,8 +33,6 @@ export const UsersPage: React.FC = () => {
 
     return (
         <div className="max-w-[1600px] mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-700 pb-10">
-
-            {/* 1. HEADER */}
             <header className="px-2">
                 <div className="flex items-center gap-4">
                     <div className="p-3 bg-slate-900 rounded-2xl text-[#ff8200] shadow-lg shadow-slate-200">
@@ -48,13 +49,13 @@ export const UsersPage: React.FC = () => {
                 </div>
             </header>
 
-            {/* 2. BARRA DE ACCIONES  */}
+            {/* BARRA DE ACCIONES  */}
             <section className="flex flex-col sm:flex-row items-center gap-4 px-2">
-                
+
                 <div className="relative group flex-1 w-full max-w-2xl">
-                    <Search 
-                        className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#ff8200] transition-colors" 
-                        size={18} 
+                    <Search
+                        className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#ff8200] transition-colors"
+                        size={18}
                     />
                     <input
                         type="text"
@@ -81,7 +82,6 @@ export const UsersPage: React.FC = () => {
                 )}
             </section>
 
-            {/* 3. CONTENIDO PRINCIPAL */}
             <main className="min-h-[450px]">
                 <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                     <UserTable
@@ -92,6 +92,7 @@ export const UsersPage: React.FC = () => {
                         onViewHistory={setHistoryUserDni}
                         onDelete={setDniToDelete}
                         onReactivate={(dni) => reactivateMutation.mutate(dni)}
+                        onEdit={handleEdit}
                     />
                 </div>
 
@@ -108,14 +109,15 @@ export const UsersPage: React.FC = () => {
                 )}
             </main>
 
-            {/* 4. MODALES */}
+            {/* MODALES */}
             <UserCreateForm
                 isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
+                onClose={handleCloseModal}
                 formData={formData}
                 setFormData={setFormData}
                 onSubmit={handleSubmit}
-                isSubmitting={createMutation.isPending}
+                isSubmitting={createMutation.isPending || updateMutation.isPending}
+                isEditMode={isEditMode}
             />
 
             <UserHistoryModal

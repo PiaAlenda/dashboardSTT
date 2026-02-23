@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { 
-    Lock, UserCircle, Briefcase, Eye, EyeOff, Fingerprint, 
-    AtSign, ShieldCheck, X, BadgeCheck, AlertCircle 
+import {
+    Lock, UserCircle, Briefcase, Eye, EyeOff, Fingerprint,
+    AtSign, ShieldCheck, X, BadgeCheck, AlertCircle
 } from 'lucide-react';
 import { Modal } from '../../../components/ui/Modal';
 
@@ -9,10 +9,10 @@ import { Modal } from '../../../components/ui/Modal';
  * COMPONENTE: FloatingInput
  * Maneja la etiqueta flotante y los estados de error/éxito visualmente.
  */
-const FloatingInput = ({ 
-    label, icon: Icon, error, type = "text", 
-    showPasswordToggle, onTogglePassword, isPasswordVisible, 
-    success, ...props 
+const FloatingInput = ({
+    label, icon: Icon, error, type = "text",
+    showPasswordToggle, onTogglePassword, isPasswordVisible,
+    success, ...props
 }: any) => {
     return (
         <div className="flex flex-col w-full group">
@@ -59,7 +59,15 @@ const FloatingInput = ({
 /**
  * COMPONENTE: UserCreateForm
  */
-export const UserCreateForm = ({ isOpen, onClose, formData, setFormData, onSubmit, isSubmitting }: any) => {
+export const UserCreateForm = ({
+    isOpen,
+    onClose,
+    formData,
+    setFormData,
+    onSubmit,
+    isSubmitting,
+    isEditMode = false
+}: any) => {
     const [showPass, setShowPass] = useState(false);
     const [confirmPassword, setConfirmPassword] = useState('');
     const [errors, setErrors] = useState<any>({});
@@ -73,15 +81,7 @@ export const UserCreateForm = ({ isOpen, onClose, formData, setFormData, onSubmi
         setErrors({});
         setConfirmPassword('');
         setShowPass(false);
-        setFormData({
-            firstName: '',
-            lastName: '',
-            dni: '',
-            username: '',
-            email: '',
-            password: '',
-            role: 'ROLE_AUDITOR'
-        });
+        // We don't clear formData here because useUsers handles it now in handleCloseModal
         onClose();
     };
 
@@ -100,7 +100,7 @@ export const UserCreateForm = ({ isOpen, onClose, formData, setFormData, onSubmi
      * DNI: Solo permite números y máximo 8 caracteres
      */
     const handleDniChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const val = e.target.value.replace(/\D/g, ''); 
+        const val = e.target.value.replace(/\D/g, '');
         if (val.length <= 8) {
             setFormData({ ...formData, dni: val });
         }
@@ -111,10 +111,10 @@ export const UserCreateForm = ({ isOpen, onClose, formData, setFormData, onSubmi
      */
     const validate = () => {
         const e: any = {};
-        
+
         if (!formData.firstName?.trim()) e.firstName = 'Requerido';
         if (!formData.lastName?.trim()) e.lastName = 'Requerido';
-        
+
         // Validación DNI: 7 u 8 números
         if (!/^\d{7,8}$/.test(formData.dni)) {
             e.dni = 'Requiere 7 u 8 números';
@@ -126,14 +126,21 @@ export const UserCreateForm = ({ isOpen, onClose, formData, setFormData, onSubmi
             e.email = 'Email Inválido (Ej: usuario@mail.com)';
         }
 
-        // Validación Password: Mínimo 8
-        if (!formData.password || formData.password.length < 8) {
-            e.password = 'Mínimo 8 caracteres';
-        }
-
-        // Coincidencia de Password
-        if (!passwordsMatch) {
-            e.confirmPassword = 'Las contraseñas no coinciden';
+        // Validación Password: Solo requerida si no es edición o si se escribió algo
+        if (!isEditMode) {
+            if (!formData.password || formData.password.length < 8) {
+                e.password = 'Mínimo 8 caracteres';
+            }
+            if (!passwordsMatch) {
+                e.confirmPassword = 'Las contraseñas no coinciden';
+            }
+        } else if (formData.password) {
+            if (formData.password.length < 8) {
+                e.password = 'Mínimo 8 caracteres';
+            }
+            if (!passwordsMatch) {
+                e.confirmPassword = 'Las contraseñas no coinciden';
+            }
         }
 
         setErrors(e);
@@ -141,13 +148,18 @@ export const UserCreateForm = ({ isOpen, onClose, formData, setFormData, onSubmi
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={handleCloseReset} title="Alta de Personal" maxWidth="4xl">
-            <form 
-                className="p-1 md:p-2" 
-                onSubmit={(e) => { 
-                    e.preventDefault(); 
-                    if (validate()) onSubmit(e); 
-                }} 
+        <Modal
+            isOpen={isOpen}
+            onClose={handleCloseReset}
+            title={isEditMode ? "Edición de Personal" : "Alta de Personal"}
+            maxWidth="4xl"
+        >
+            <form
+                className="p-1 md:p-2"
+                onSubmit={(e) => {
+                    e.preventDefault();
+                    if (validate()) onSubmit(e);
+                }}
                 autoComplete="off"
             >
                 <div className="flex flex-col md:grid md:grid-cols-12 gap-6 items-stretch">
@@ -175,12 +187,13 @@ export const UserCreateForm = ({ isOpen, onClose, formData, setFormData, onSubmi
                         </div>
 
                         <FloatingInput
-                            label="DNI / Solo Números"
+                            label="DNI"
                             icon={Fingerprint}
                             inputMode="numeric"
                             value={formData.dni || ''}
                             error={errors.dni}
                             onChange={handleDniChange}
+                            readOnly={isEditMode}
                         />
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -211,7 +224,7 @@ export const UserCreateForm = ({ isOpen, onClose, formData, setFormData, onSubmi
 
                         <div className="space-y-4">
                             <FloatingInput
-                                label="Contraseña"
+                                label={isEditMode ? "Nueva Contraseña (opcional)" : "Contraseña"}
                                 type="password"
                                 showPasswordToggle
                                 isPasswordVisible={showPass}
@@ -224,7 +237,7 @@ export const UserCreateForm = ({ isOpen, onClose, formData, setFormData, onSubmi
                             <FloatingInput
                                 label="Confirmar Contraseña"
                                 type="password"
-                                success={passwordsMatch}
+                                success={passwordsMatch && !!formData.password}
                                 error={errors.confirmPassword}
                                 value={confirmPassword}
                                 onChange={(e: any) => setConfirmPassword(e.target.value)}
@@ -264,7 +277,7 @@ export const UserCreateForm = ({ isOpen, onClose, formData, setFormData, onSubmi
                         disabled={isSubmitting}
                         className="order-1 sm:order-2 w-full sm:w-auto bg-[#ff8200] hover:bg-slate-800 text-white px-10 py-4 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all shadow-lg shadow-orange-200 flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50 disabled:grayscale"
                     >
-                        {isSubmitting ? 'Procesando...' : 'Confirmar Alta'}
+                        {isSubmitting ? 'Procesando...' : (isEditMode ? 'Guardar Cambios' : 'Confirmar Alta')}
                         <ShieldCheck size={18} />
                     </button>
                 </div>

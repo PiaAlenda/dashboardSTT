@@ -1,4 +1,4 @@
-import { Mail, Clock, RotateCcw, Trash2, User as UserIcon, Fingerprint } from 'lucide-react';
+import { Mail, Clock, RotateCcw, Trash2, User as UserIcon, Fingerprint, Pencil } from 'lucide-react';
 
 interface UserTableProps {
     users: any[];
@@ -8,6 +8,7 @@ interface UserTableProps {
     onViewHistory: (dni: string) => void;
     onDelete: (dni: string) => void;
     onReactivate: (dni: string) => void;
+    onEdit: (user: any) => void;
 }
 
 export const UserTable = ({
@@ -17,18 +18,19 @@ export const UserTable = ({
     onToggleShowDeleted,
     onViewHistory,
     onDelete,
-    onReactivate
+    onReactivate,
+    onEdit
 }: UserTableProps) => {
     return (
         <div className="space-y-6">
-            
+
             {/* --- HEADER --- */}
             <div className="flex justify-between items-center bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
                 <h2 className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 flex items-center gap-2">
-                    <UserIcon size={14} className="text-[#ff8200]" /> 
+                    <UserIcon size={14} className="text-[#ff8200]" />
                     Personal Registrado ({users.length})
                 </h2>
-                
+
                 <label className="flex items-center gap-3 cursor-pointer group bg-slate-50 px-4 py-2 rounded-xl border border-slate-200 hover:border-red-200 transition-all">
                     <span className={`text-[10px] font-black uppercase tracking-tight transition-colors ${showDeleted ? 'text-red-500' : 'text-slate-500'}`}>
                         Ver Usuarios Eliminados
@@ -48,11 +50,11 @@ export const UserTable = ({
             {/* --- GRID DE CARDS --- */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
                 {users.map((u) => (
-                    <div 
-                        key={u.id} 
+                    <div
+                        key={u.id}
                         className={`relative p-6 rounded-[2.5rem] border transition-all duration-300 bg-white
-                            ${u.deleted 
-                                ? 'border-red-100 bg-red-50/30 grayscale opacity-80' 
+                            ${u.deleted
+                                ? 'border-red-100 bg-red-50/30 grayscale opacity-80'
                                 : 'border-slate-100 hover:border-orange-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-orange-500/10'}`}
                     >
                         {u.deleted && (
@@ -79,9 +81,9 @@ export const UserTable = ({
                                 </h3>
                                 <div className="flex flex-col items-center gap-1.5">
                                     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-widest
-                                        ${u.role === 'ROLE_SUPER_ADMIN' ? 'bg-orange-100 text-orange-600' : 
-                                          u.role === 'ROLE_ADMIN' ? 'bg-purple-100 text-purple-600' : 
-                                          'bg-blue-100 text-blue-600'}`}>
+                                        ${u.role === 'ROLE_SUPER_ADMIN' ? 'bg-orange-100 text-orange-600' :
+                                            u.role === 'ROLE_ADMIN' ? 'bg-purple-100 text-purple-600' :
+                                                'bg-blue-100 text-blue-600'}`}>
                                         {u.role?.replace('ROLE_', '')}
                                     </span>
                                     <span className="text-[9px] font-bold text-slate-400 flex items-center gap-1">
@@ -105,9 +107,20 @@ export const UserTable = ({
                                         <button
                                             onClick={() => onViewHistory(u.dni)}
                                             className="p-2 text-slate-400 hover:text-[#ff8200] hover:bg-orange-50 rounded-xl transition-all"
+                                            title="Historial"
                                         >
                                             <Clock size={16} />
                                         </button>
+
+                                        {!u.deleted && (
+                                            <button
+                                                onClick={() => onEdit(u)}
+                                                className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded-xl transition-all"
+                                                title="Editar"
+                                            >
+                                                <Pencil size={16} />
+                                            </button>
+                                        )}
 
                                         {u.deleted ? (
                                             <button

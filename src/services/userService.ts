@@ -19,4 +19,8 @@ export const userService = {
         const response = await api.get(`admin/users/${dni}/history`);
         return response.data;
     },
+
+    update: async (dni: string, userData: any): Promise<void> => {
+        await api.put(`admin/users/${dni}`, userData);
+    },
 };

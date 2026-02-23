@@ -95,13 +95,13 @@ export const useReports = (range: string = 'month') => {
         color: ROLE_COLORS[index % ROLE_COLORS.length]
     })), [roleStats]);
 
-  const levelStats = useMemo(() => stats.byRoleAndLevel.reduce((acc: any, curr) => {
-    const cleanLevel = curr.educationLevelName.toLowerCase().replace(/nivel/g, '').trim();
-    const name = `n. ${cleanLevel}`; 
+    const levelStats = useMemo(() => stats.byRoleAndLevel.reduce((acc: any, curr) => {
+        const cleanLevel = curr.educationLevelName.toLowerCase().replace(/nivel/g, '').trim();
+        const name = `n. ${cleanLevel}`;
 
-    acc[name] = (acc[name] || 0) + curr.count;
-    return acc;
-}, {}), [stats.byRoleAndLevel]);
+        acc[name] = (acc[name] || 0) + curr.count;
+        return acc;
+    }, {}), [stats.byRoleAndLevel]);
 
     const LEVEL_COLORS = ['#6366f1', '#8b5cf6', '#ec4899', '#f43f5e', '#f97316'];
     const levelChartData = useMemo(() => Object.entries(levelStats).map(([name, count], index) => ({
@@ -110,16 +110,41 @@ export const useReports = (range: string = 'month') => {
         color: LEVEL_COLORS[index % LEVEL_COLORS.length]
     })), [levelStats]);
 
-    const sourceStats = useMemo(() => filteredEnrollments.reduce((acc: { bot: number; web: number }, curr: Enrollment) => {
-        if (!curr.dataSource) acc.bot++;
-        else acc.web++;
-        return acc;
-    }, { bot: 0, web: 0 }), [filteredEnrollments]);
+    const SOURCE_METADATA: Record<string, { name: string; color: string }> = {
+        '1': { name: 'Bot WhatsApp', color: '#22c55e' }, 
+        '2': { name: 'Formulario Web', color: '#3b82f6' }, 
+        '3': { name: 'Formulario Web MFyDH', color: '#8b5cf6' }, 
+        '4': { name: 'Bot WhatsApp MFyDH', color: '#10b981' }, 
+    };
 
-    const sourceChartData = [
-        { name: 'Bot WhatsApp', value: sourceStats.bot, color: '#ff8200' },
-        { name: 'Formulario Web', value: sourceStats.web, color: '#1e293b' },
-    ];
+    const sourceStats = useMemo(() => filteredEnrollments.reduce((acc: Record<string, number>, curr: Enrollment) => {
+        const rawSource = curr.dataSource ?? (curr as any).datasource ?? (curr as any).data_source;
+
+        let key = '2'; 
+
+        if (rawSource === null || rawSource === undefined || rawSource === 'null' || rawSource === 1 || rawSource === '1') {
+            key = '1';
+        } else if (rawSource === 2 || rawSource === '2' || rawSource === 'web' || rawSource === 'WEB') {
+            key = '2';
+        } else if (rawSource === 3 || rawSource === '3') {
+            key = '3';
+        } else if (rawSource === 4 || rawSource === '4') {
+            key = '4';
+        } else if (typeof rawSource === 'string' && rawSource.toLowerCase().includes('bot')) {
+            key = '1';
+        }
+
+        acc[key] = ((acc[key] as number) || 0) + 1;
+        return acc;
+    }, {}), [filteredEnrollments]);
+
+    const sourceChartData = useMemo(() => Object.entries(sourceStats)
+        .map(([key, count]) => ({
+            name: SOURCE_METADATA[key]?.name || 'Otros',
+            value: count as number,
+            color: SOURCE_METADATA[key]?.color || '#94a3b8'
+        }))
+        .filter(item => item.value > 0), [sourceStats]);
 
     const rejectionStats = useMemo(() => filteredEnrollments.reduce((acc: Record<string, number>, curr: Enrollment) => {
         if (curr.status?.toUpperCase() === 'RECHAZADO') {
@@ -171,11 +196,11 @@ export const useReports = (range: string = 'month') => {
             value: claims.filter((c: any) => c.status === 'PENDIENTE').length.toString(),
             color: 'blue' as const
         },
-       // {
-       //     label: "Beneficiarios",
-       //     value: totalEnrollments.toLocaleString(),
-       //     color: 'purple' as const
-       // },
+        // {
+        //     label: "Beneficiarios",
+        //     value: totalEnrollments.toLocaleString(),
+        //     color: 'purple' as const
+        // },
     ], [totalEnrollments, approvedCount, claims]);
 
     return {

@@ -10,6 +10,7 @@ import { UsersPage } from './pages/UsersPage';
 import { ClaimsPage } from './pages/ClaimsPage';
 import { ReportsPage } from './pages/ReportsPage';
 import { ProfilePage } from './pages/ProfilePage';
+import { ConfigPage } from './pages/ConfigPage';
 
 const queryClient = new QueryClient();
 
@@ -57,6 +58,16 @@ function App() {
                 <ProtectedRoute allowedRoles={['ROLE_SUPER_ADMIN', 'ROLE_ADMIN', 'ROLE_AUDITOR']}>
                   <MainLayout>
                     <ReportsPage />
+                  </MainLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/4a12b69c3dcb/c0nfig"
+              element={
+                <ProtectedRoute allowedRoles={['ROLE_SUPER_ADMIN']}>
+                  <MainLayout>
+                    <ConfigPage />
                   </MainLayout>
                 </ProtectedRoute>
               }

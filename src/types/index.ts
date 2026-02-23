@@ -36,7 +36,7 @@ export interface Enrollment {
     schoolName: string;
     deleted: boolean;
     updatedAt?: string;
-    dataSource?: string | null;
+    dataSource?: number | string | null;
     rejectionReasonId?: number;
     rejectionReason?: string;
     rejectionReasonName?: string;

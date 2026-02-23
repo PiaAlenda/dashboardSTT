@@ -7,7 +7,8 @@ import {
     ChevronLeft,
     ChevronRight,
     MessageSquare,
-    BarChart3
+    BarChart3,
+    Settings
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import type { Role } from '../types';
@@ -24,6 +25,7 @@ export const NAV_ITEMS: NavItem[] = [
     { label: 'Reclamos', icon: MessageSquare, path: '/4a12b69c3dcb/f7e8d9c0b1a2', roles: ['ROLE_SUPER_ADMIN', 'ROLE_ADMIN', 'ROLE_AUDITOR'] },
     { label: 'Usuarios', icon: Users, path: '/4a12b69c3dcb/d3e4f5a6b7c8', roles: ['ROLE_SUPER_ADMIN'] },
     { label: 'Reportes', icon: BarChart3, path: '/4a12b69c3dcb/a3b2c1d0e9f8', roles: ['ROLE_SUPER_ADMIN', 'ROLE_ADMIN'] },
+    { label: 'Configuración', icon: Settings, path: '/4a12b69c3dcb/c0nfig', roles: ['ROLE_SUPER_ADMIN'] },
 ];
 
 export const Sidebar: React.FC = () => {
@@ -55,8 +57,8 @@ export const Sidebar: React.FC = () => {
                 <div className={`flex h-20 shrink-0 items-center px-4 transition-all ${isCollapsed ? 'justify-center' : 'gap-3'}`}>
                     <div className="relative shrink-0">
                         {/* CORRECCIÓN AQUÍ: onClick={() => navigate('/')} */}
-                        <div 
-                            className="h-10 w-10 rounded-xl bg-white flex items-center justify-center shadow-lg shadow-slate-200/60 border border-slate-100 cursor-pointer active:scale-95 transition-transform" 
+                        <div
+                            className="h-10 w-10 rounded-xl bg-white flex items-center justify-center shadow-lg shadow-slate-200/60 border border-slate-100 cursor-pointer active:scale-95 transition-transform"
                             onClick={() => navigate('/')}
                         >
                             <img src="/favicon.png" alt="Logo" className="h-full w-full object-cover p-1" />
