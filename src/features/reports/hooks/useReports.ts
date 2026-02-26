@@ -210,19 +210,27 @@ export const useReports = (range: string = 'month') => {
         const colors = ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ec4899', '#6366f1', '#f43f5e', '#14b8a6'];
 
         filteredEnrollments.forEach((e: any) => {
+            // Creamos un Set por cada inscripción (persona) para evitar duplicados internos
+            const uniqueCompaniesPerPerson = new Set<string>();
+
             for (let i = 1; i <= 10; i++) {
                 const companyName = e[`busCompany${i}Name`];
                 if (companyName && typeof companyName === 'string' && companyName.trim() !== '') {
-                    const normalized = companyName.trim();
-                    counts[normalized] = (counts[normalized] || 0) + 1;
+                    // Agregamos al Set (si ya existe, no hace nada)
+                    uniqueCompaniesPerPerson.add(companyName.trim());
                 }
             }
+
+            // Ahora volcamos lo que hay en el Set al contador global
+            uniqueCompaniesPerPerson.forEach((normalizedName) => {
+                counts[normalizedName] = (counts[normalizedName] || 0) + 1;
+            });
         });
 
         return Object.entries(counts)
             .map(([name, value], index) => ({
                 name,
-                value,
+                value, // Ahora este valor representa "Cantidad de Personas"
                 color: colors[index % colors.length]
             }))
             .sort((a, b) => b.value - a.value);
