@@ -9,49 +9,58 @@ export const ConfigPage: React.FC = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [isUpdating, setIsUpdating] = useState<string | null>(null);
 
-    useEffect(() => { loadStatuses(); }, []);
-
-    const loadStatuses = async () => {
-        try {
-            const data = await configService.getStatuses();
-            setStatuses(data);
-        } catch (error) { console.error(error); } 
-        finally { setIsLoading(false); }
-    };
+    // Carga inicial
+    useEffect(() => {
+        let isMounted = true;
+        const loadStatuses = async () => {
+            try {
+                const data = await configService.getStatuses();
+                if (isMounted) setStatuses(data);
+            } catch (error) {
+                console.error("Error al cargar:", error);
+            } finally {
+                if (isMounted) setIsLoading(false);
+            }
+        };
+        loadStatuses();
+        return () => { isMounted = false; };
+    }, []);
 
     const handleToggle = async (id: string, currentStatus: boolean) => {
+        const nextStatus = !currentStatus;
         setIsUpdating(id);
+
         try {
-            await configService.updateStatus(id, !currentStatus);
-            setStatuses(prev => prev.map(s => s.id === id ? { ...s, isActive: !currentStatus } : s));
+            // Enviamos a la API
+            await configService.updateStatus(id, nextStatus);
+            
+            // Actualizamos el estado local si la API fue exitosa
+            setStatuses(prev => prev.map(s => 
+                s.id === id ? { ...s, isActive: nextStatus } : s
+            ));
         } catch (error) {
-            alert("Error al actualizar");
+            // El error ya lo lanza el service, aquí solo detenemos la carga
+            console.error("Fallo en el toggle");
         } finally {
             setIsUpdating(null);
         }
     };
 
-    if (isLoading) return <LoadingOverlay message="Cargando configuración..." />;
+    if (isLoading) return <LoadingOverlay message="Sincronizando..." />;
 
     return (
-        <div className="max-w-[1700px] mx-auto space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-1000 pb-20 px-6">
-            
-            {/* Header */}
-            <header className="flex items-center justify-between">
-                <div className="flex items-center gap-6">
-                    <div className="p-4 bg-slate-900 rounded-[2rem] text-[#ff8200] shadow-2xl shadow-orange-200/20 rotate-3">
-                        <Settings size={32} />
-                    </div>
-                    <div>
-                        <h1 className="text-3xl 2xl:text-5xl font-black text-slate-900 tracking-tighter">
-                            Configuración de <span className="text-[#ff8200]">Red</span>
-                        </h1>
-                        <p className="text-xs font-bold text-slate-400 uppercase tracking-[0.3em] mt-2">
-                            Master Control Panel • Infraestructura
-                        </p>
-                    </div>
+        <div className="max-w-[1700px] mx-auto space-y-12 animate-in fade-in duration-700 pb-20 px-6 mt-10">
+            <header className="flex items-center gap-6">
+                <div className="p-4 bg-slate-900 rounded-[2rem] text-[#ff8200] shadow-xl">
+                    <Settings size={32} />
+                </div>
+                <div>
+                    <h1 className="text-3xl font-black text-slate-900 tracking-tighter">
+                        Configuración de <span className="text-[#ff8200]">Red</span>
+                    </h1>
                 </div>
             </header>
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
                 {statuses.map((site) => (
                     <ConfigCard 
@@ -63,17 +72,13 @@ export const ConfigPage: React.FC = () => {
                 ))}
             </div>
 
-            {/* Footer */}
-            <footer className="bg-slate-900 p-8 rounded-[3rem] flex items-center gap-6 shadow-2xl shadow-slate-900/20">
-                <div className="p-4 bg-[#ff8200] rounded-2xl text-white animate-pulse">
+            <footer className="bg-slate-900 p-8 rounded-[3rem] flex items-center gap-6">
+                <div className="p-4 bg-[#ff8200] rounded-2xl text-white">
                     <Shield size={24} />
                 </div>
-                <div className="flex-1">
-                    <h4 className="text-sm font-black text-white uppercase tracking-widest">Protocolo de Seguridad Activo</h4>
-                    <p className="text-[11px] font-medium text-slate-400 mt-1 uppercase tracking-wider leading-relaxed">
-                        Cualquier cambio en los interruptores superiores afectará la visibilidad de la API y Documentación de forma global.
-                    </p>
-                </div>
+                <p className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">
+                    Protocolo de Seguridad Activo • Los cambios afectan la visibilidad global.
+                </p>
             </footer>
         </div>
     );

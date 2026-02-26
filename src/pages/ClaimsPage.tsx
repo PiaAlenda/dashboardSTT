@@ -1,10 +1,11 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Search, MessageSquareQuote, FilterX, X as CloseIcon } from 'lucide-react';
 import { useClaims } from '../features/claims/hooks/useClaims';
 import { ClaimTable } from '../features/claims/components/ClaimTable';
 import { ClaimReplyModal } from '../features/claims/components/ClaimReplyModal';
 import { ClaimsFilter } from '../features/claims/components/ClaimsFilter';
 import { LoadingOverlay } from '../components/ui/LoadingOverlay';
+import { Pagination } from '../components/ui/Pagination';
 
 const sanitize = (text: string) => text?.replace(/^"|"$/g, '') || '';
 
@@ -14,6 +15,12 @@ export const ClaimsPage = () => {
         selectedClaim, setSelectedClaim, answerMutation
     } = useClaims();
     const [showAnswered, setShowAnswered] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 50;
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm, showAnswered]);
 
     const filteredClaims = useMemo(() => {
         return claims
@@ -29,6 +36,12 @@ export const ClaimsPage = () => {
             }));
     }, [claims, showAnswered]);
 
+    const totalPages = Math.ceil(filteredClaims.length / itemsPerPage);
+    const paginatedClaims = useMemo(() => {
+        const start = (currentPage - 1) * itemsPerPage;
+        return filteredClaims.slice(start, start + itemsPerPage);
+    }, [filteredClaims, currentPage]);
+
     if (isLoading) {
         return <LoadingOverlay message="Sincronizando Reclamos Ciudadanos..." />;
     }
@@ -43,11 +56,11 @@ export const ClaimsPage = () => {
 
             {/* 2. BARRA DE ACCIONES*/}
             <section className="flex flex-col md:flex-row items-center gap-4 px-2">
-            
+
                 <div className="relative group flex-1 w-full max-w-2xl">
-                    <Search 
-                        className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#ff8200] transition-colors" 
-                        size={18} 
+                    <Search
+                        className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#ff8200] transition-colors"
+                        size={18}
                     />
                     <input
                         type="text"
@@ -76,11 +89,16 @@ export const ClaimsPage = () => {
 
             {/*  CONTENIDO PRINCIPAL */}
             <main className="min-h-[500px]">
-                {filteredClaims.length > 0 ? (
+                {paginatedClaims.length > 0 ? (
                     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                         <ClaimTable
-                            claims={filteredClaims}
+                            claims={paginatedClaims}
                             onAction={setSelectedClaim}
+                        />
+                        <Pagination
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            onPageChange={setCurrentPage}
                         />
                     </div>
                 ) : (

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { LayoutGrid, Info, HelpCircle } from 'lucide-react';
 import { useEnrollments } from '../features/enrollments/hooks/useEnrollments';
 import { useAuth } from '../context/AuthContext';
@@ -7,12 +7,13 @@ import { LoadingOverlay } from '../components/ui/LoadingOverlay';
 import { EnrollmentFilters } from '../features/enrollments/components/EnrollmentFilters';
 import { EnrollmentToolbar } from '../features/enrollments/components/EnrollmentToolbar';
 import { EnrollmentModals } from '../features/enrollments/components/EnrollmentModals';
-import { HelpModal } from '../features/enrollments/components/HelpModal'; 
+import { HelpModal } from '../features/enrollments/components/HelpModal';
+import { Pagination } from '../components/ui/Pagination';
 
 export const EnrollmentPage = () => {
     const { user } = useAuth();
     const [isHelpOpen, setIsHelpOpen] = useState(false);
-    
+
     const {
         enrollments, isLoading, searchTerm, setSearchTerm,
         selectedEnrollment, setSelectedEnrollment,
@@ -24,6 +25,19 @@ export const EnrollmentPage = () => {
         statusMutation, deleteMutation,
         exportCsv, exportDates, setExportDates, isExporting
     } = useEnrollments();
+
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 50;
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm, filters]);
+
+    const totalPages = Math.ceil(enrollments.length / itemsPerPage);
+    const paginatedEnrollments = useMemo(() => {
+        const start = (currentPage - 1) * itemsPerPage;
+        return enrollments.slice(start, start + itemsPerPage);
+    }, [enrollments, currentPage]);
 
     if (isLoading) return <LoadingOverlay message="Sincronizando Padrón de Beneficiarios..." />;
 
@@ -41,7 +55,7 @@ export const EnrollmentPage = () => {
                             <h1 className="text-2xl 2xl:text-4xl font-black text-slate-800 tracking-tight">
                                 Atención de <span className="text-[#ff8200]">Inscripciones</span>
                             </h1>
-                            <button 
+                            <button
                                 onClick={() => setIsHelpOpen(true)}
                                 className="p-1.5 text-slate-300 hover:text-[#ff8200] hover:bg-orange-50 rounded-lg transition-all active:scale-90"
                                 style={{ animation: 'btn-help-active 3s ease-in-out infinite' }}
@@ -80,16 +94,21 @@ export const EnrollmentPage = () => {
             </section>
 
             <main className="w-full text-left">
-                {enrollments.length > 0 ? (
+                {paginatedEnrollments.length > 0 ? (
                     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                         <EnrollmentList
-                            enrollments={enrollments}
+                            enrollments={paginatedEnrollments}
                             selectedEnrollmentId={selectedEnrollment?.dni}
                             onViewDetail={setSelectedEnrollment}
                             onManageStatus={(e) => setStatusSelector({ dni: e.dni, currentStatus: e.status || '' })}
                             onReject={(e) => setConfirmAction({ dni: e.dni, status: 'RECHAZADO', currentStatus: e.status || '' })}
                             onDelete={setDniToDelete}
                             onReactivate={(dni) => deleteMutation.mutate({ dni, reactivate: true })}
+                        />
+                        <Pagination
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            onPageChange={setCurrentPage}
                         />
                     </div>
                 ) : (
