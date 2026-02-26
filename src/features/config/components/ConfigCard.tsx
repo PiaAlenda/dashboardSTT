@@ -1,5 +1,5 @@
 import React from 'react';
-import { ExternalLink, Globe, Shield, Activity, Power, Lock, Terminal } from 'lucide-react';
+import { ExternalLink, Globe, Shield, Activity, Lock, Terminal } from 'lucide-react';
 import { type SiteStatus } from '../../../services/configService';
 
 interface ConfigCardProps {
