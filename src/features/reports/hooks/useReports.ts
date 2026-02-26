@@ -48,18 +48,60 @@ export const useReports = (range: string = 'month') => {
     const filteredEnrollments = useMemo(() => {
         if (!rawEnrollments.length) return [];
         const now = new Date();
+        const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
         return rawEnrollments.filter((e: Enrollment) => {
-            if (!e.createdAt) return true;
+            if (!e.createdAt) return false;
             const date = new Date(e.createdAt);
-            if (range === 'today') return date.toDateString() === now.toDateString();
+
+            if (range === 'today') {
+                return date >= startOfDay;
+            }
+
             if (range === 'week') {
                 const oneWeekAgo = new Date();
                 oneWeekAgo.setDate(now.getDate() - 7);
+                oneWeekAgo.setHours(0, 0, 0, 0);
                 return date >= oneWeekAgo;
             }
+
+            if (range === 'month') {
+                const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+                return date >= firstDayOfMonth;
+            }
+
             return true;
         });
     }, [rawEnrollments, range]);
+
+    const filteredClaims = useMemo(() => {
+        if (!claims.length) return [];
+        const now = new Date();
+        const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+        return claims.filter((c: any) => {
+            if (!c.createdAt) return false;
+            const date = new Date(c.createdAt);
+
+            if (range === 'today') {
+                return date >= startOfDay;
+            }
+
+            if (range === 'week') {
+                const oneWeekAgo = new Date();
+                oneWeekAgo.setDate(now.getDate() - 7);
+                oneWeekAgo.setHours(0, 0, 0, 0);
+                return date >= oneWeekAgo;
+            }
+
+            if (range === 'month') {
+                const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+                return date >= firstDayOfMonth;
+            }
+
+            return true;
+        });
+    }, [claims, range]);
 
     const STATUS_COLORS: Record<string, string> = {
         'APROBADO': '#22c55e',
@@ -69,11 +111,19 @@ export const useReports = (range: string = 'month') => {
         'CANCELADO': '#94a3b8',
     };
 
-    const statusChartData = useMemo(() => stats.byStatus.map(s => ({
-        name: s.name.replace(/_/g, ' '),
-        value: s.count,
-        color: STATUS_COLORS[s.name.toUpperCase()] || '#6366f1'
-    })), [stats.byStatus]);
+    const statusChartData = useMemo(() => {
+        const counts = filteredEnrollments.reduce((acc: Record<string, number>, curr: Enrollment) => {
+            const status = curr.status?.toUpperCase() || 'PENDIENTE';
+            acc[status] = (acc[status] || 0) + 1;
+            return acc;
+        }, {} as Record<string, number>);
+
+        return Object.entries(counts).map(([name, count]) => ({
+            name: name.replace(/_/g, ' '),
+            value: count,
+            color: STATUS_COLORS[name] || '#6366f1'
+        })).sort((a, b) => (b.value as number) - (a.value as number));
+    }, [filteredEnrollments]);
 
     const SHIFT_COLORS = ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ec4899'];
     const shiftChartData = useMemo(() => stats.byShift.map((s, index) => ({
@@ -82,33 +132,37 @@ export const useReports = (range: string = 'month') => {
         color: SHIFT_COLORS[index % SHIFT_COLORS.length]
     })), [stats.byShift]);
 
-    const roleStats = useMemo(() => stats.byRoleAndLevel.reduce((acc: any, curr) => {
-        const name = curr.beneficiaryTypeName;
-        acc[name] = (acc[name] || 0) + curr.count;
-        return acc;
-    }, {}), [stats.byRoleAndLevel]);
-
     const ROLE_COLORS = ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ec4899'];
-    const beneficiaryChartData = useMemo(() => Object.entries(roleStats).map(([name, count], index) => ({
-        name,
-        value: count as number,
-        color: ROLE_COLORS[index % ROLE_COLORS.length]
-    })), [roleStats]);
+    const beneficiaryChartData = useMemo(() => {
+        const counts = filteredEnrollments.reduce((acc: Record<string, number>, curr: Enrollment) => {
+            const name = curr.beneficiaryType || 'Otros';
+            acc[name] = (acc[name] || 0) + 1;
+            return acc;
+        }, {} as Record<string, number>);
 
-    const levelStats = useMemo(() => stats.byRoleAndLevel.reduce((acc: any, curr) => {
-        const cleanLevel = curr.educationLevelName.toLowerCase().replace(/nivel/g, '').trim();
-        const name = `n. ${cleanLevel}`;
-
-        acc[name] = (acc[name] || 0) + curr.count;
-        return acc;
-    }, {}), [stats.byRoleAndLevel]);
+        return Object.entries(counts).map(([name, count], index) => ({
+            name,
+            value: count,
+            color: ROLE_COLORS[index % ROLE_COLORS.length]
+        })).sort((a, b) => (b.value as number) - (a.value as number));
+    }, [filteredEnrollments]);
 
     const LEVEL_COLORS = ['#6366f1', '#8b5cf6', '#ec4899', '#f43f5e', '#f97316'];
-    const levelChartData = useMemo(() => Object.entries(levelStats).map(([name, count], index) => ({
-        name,
-        value: count as number,
-        color: LEVEL_COLORS[index % LEVEL_COLORS.length]
-    })), [levelStats]);
+    const levelChartData = useMemo(() => {
+        const counts = filteredEnrollments.reduce((acc: Record<string, number>, curr: Enrollment) => {
+            const level = curr.educationLevel || 'No especificado';
+            const cleanLevel = level.toLowerCase().replace(/nivel/g, '').trim();
+            const name = `n. ${cleanLevel}`;
+            acc[name] = (acc[name] || 0) + 1;
+            return acc;
+        }, {} as Record<string, number>);
+
+        return Object.entries(counts).map(([name, count], index) => ({
+            name,
+            value: count,
+            color: LEVEL_COLORS[index % LEVEL_COLORS.length]
+        })).sort((a, b) => (b.value as number) - (a.value as number));
+    }, [filteredEnrollments]);
 
     const SOURCE_METADATA: Record<string, { name: string; color: string }> = {
         '1': { name: 'Bot WhatsApp', color: '#22c55e' },
@@ -177,8 +231,8 @@ export const useReports = (range: string = 'month') => {
         color: REJECTION_COLORS[index % REJECTION_COLORS.length]
     })).filter(item => item.value > 0);
 
-    const totalEnrollments = useMemo(() => stats.byStatus.reduce((acc, curr) => acc + curr.count, 0), [stats.byStatus]);
-    const approvedCount = useMemo(() => stats.byStatus.find(s => s.name.toUpperCase() === 'APROBADO')?.count || 0, [stats.byStatus]);
+    const totalEnrollments = useMemo(() => filteredEnrollments.length, [filteredEnrollments]);
+    const approvedCount = useMemo(() => filteredEnrollments.filter((e: Enrollment) => e.status?.toUpperCase() === 'APROBADO').length, [filteredEnrollments]);
 
     // Real data from enrollments for bus lines
     const busLinesChartData = useMemo(() => {
@@ -249,15 +303,15 @@ export const useReports = (range: string = 'month') => {
         },
         {
             label: "Reclamos Activos",
-            value: claims.filter((c: any) => c.status === 'PENDIENTE').length.toString(),
+            value: filteredClaims.filter((c: any) => c.status === 'PENDIENTE').length.toString(),
             color: 'blue' as const
         },
         {
             label: "Reclamos Contestados",
-            value: claims.filter((c: any) => c.status === 'RESPONDIDO' || c.status === 'CONTESTADO').length.toString(),
+            value: filteredClaims.filter((c: any) => c.status === 'RESPONDIDO' || c.status === 'CONTESTADO').length.toString(),
             color: 'emerald' as const
         },
-    ], [totalEnrollments, approvedCount, claims]);
+    ], [totalEnrollments, approvedCount, filteredClaims]);
 
     return {
         isLoading,
