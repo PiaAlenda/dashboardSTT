@@ -4,7 +4,7 @@ import { statsService } from '../../../services/statsService';
 import { claimService } from '../../../services/claimService';
 import { enrollmentService } from '../../../services/enrollmentService';
 import { masterDataService } from '../../../services/masterDataService';
-import type { Statistics, Enrollment } from '../../../types';
+import type { Statistics, Enrollment, ChartDataItem } from '../../../types';
 
 export const useReports = (range: string = 'month') => {
     const statsQuery = useQuery({
@@ -118,15 +118,15 @@ export const useReports = (range: string = 'month') => {
             return acc;
         }, {} as Record<string, number>);
 
-        return Object.entries(counts).map(([name, count]) => ({
+        return (Object.entries(counts).map(([name, count]) => ({
             name: name.replace(/_/g, ' '),
             value: count,
             color: STATUS_COLORS[name] || '#6366f1'
-        })).sort((a, b) => (b.value as number) - (a.value as number));
+        })) as ChartDataItem[]).sort((a, b) => b.value - a.value);
     }, [filteredEnrollments]);
 
     const SHIFT_COLORS = ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ec4899'];
-    const shiftChartData = useMemo(() => stats.byShift.map((s, index) => ({
+    const shiftChartData = useMemo<ChartDataItem[]>(() => stats.byShift.map((s, index) => ({
         name: s.name,
         value: s.count,
         color: SHIFT_COLORS[index % SHIFT_COLORS.length]
@@ -140,11 +140,11 @@ export const useReports = (range: string = 'month') => {
             return acc;
         }, {} as Record<string, number>);
 
-        return Object.entries(counts).map(([name, count], index) => ({
+        return (Object.entries(counts).map(([name, count], index) => ({
             name,
             value: count,
             color: ROLE_COLORS[index % ROLE_COLORS.length]
-        })).sort((a, b) => (b.value as number) - (a.value as number));
+        })) as ChartDataItem[]).sort((a, b) => b.value - a.value);
     }, [filteredEnrollments]);
 
     const LEVEL_COLORS = ['#6366f1', '#8b5cf6', '#ec4899', '#f43f5e', '#f97316'];
@@ -157,11 +157,11 @@ export const useReports = (range: string = 'month') => {
             return acc;
         }, {} as Record<string, number>);
 
-        return Object.entries(counts).map(([name, count], index) => ({
+        return (Object.entries(counts).map(([name, count], index) => ({
             name,
             value: count,
             color: LEVEL_COLORS[index % LEVEL_COLORS.length]
-        })).sort((a, b) => (b.value as number) - (a.value as number));
+        })) as ChartDataItem[]).sort((a, b) => b.value - a.value);
     }, [filteredEnrollments]);
 
     const SOURCE_METADATA: Record<string, { name: string; color: string }> = {
@@ -192,7 +192,7 @@ export const useReports = (range: string = 'month') => {
         return acc;
     }, {}), [filteredEnrollments]);
 
-    const sourceChartData = useMemo(() => Object.entries(sourceStats)
+    const sourceChartData = useMemo<ChartDataItem[]>(() => Object.entries(sourceStats)
         .map(([key, count]) => ({
             name: SOURCE_METADATA[key]?.name || 'Otros',
             value: count as number,
@@ -229,7 +229,7 @@ export const useReports = (range: string = 'month') => {
         name,
         value: count as number,
         color: REJECTION_COLORS[index % REJECTION_COLORS.length]
-    })).filter(item => item.value > 0);
+    })).filter(item => item.value > 0) as ChartDataItem[];
 
     const totalEnrollments = useMemo(() => filteredEnrollments.length, [filteredEnrollments]);
     const approvedCount = useMemo(() => filteredEnrollments.filter((e: Enrollment) => e.status?.toUpperCase() === 'APROBADO').length, [filteredEnrollments]);
@@ -255,7 +255,7 @@ export const useReports = (range: string = 'month') => {
                 value,
                 color: colors[index % colors.length]
             }))
-            .sort((a, b) => b.value - a.value);
+            .sort((a, b) => b.value - a.value) as ChartDataItem[];
     }, [filteredEnrollments]);
 
     // Real data from enrollments for bus companies
@@ -287,7 +287,7 @@ export const useReports = (range: string = 'month') => {
                 value, // Ahora este valor representa "Cantidad de Personas"
                 color: colors[index % colors.length]
             }))
-            .sort((a, b) => b.value - a.value);
+            .sort((a, b) => b.value - a.value) as ChartDataItem[];
     }, [filteredEnrollments]);
 
     const statsGrid = useMemo(() => [

@@ -95,3 +95,9 @@ export interface Statistics {
         count: number;
     }[];
 }
+
+export interface ChartDataItem {
+    name: string;
+    value: number;
+    color: string;
+}
