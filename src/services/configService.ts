@@ -3,43 +3,36 @@ import api from './api';
 export interface SiteStatus {
     id: 'swagger' | 'enrollment';
     name: string;
-    isActive: boolean;
+    enabled: boolean;
     url: string;
 }
 
 export const configService = {
     getStatuses: async (): Promise<SiteStatus[]> => {
-        // Mantenemos el Mock pero listo para switch a API
         return [
             {
                 id: 'swagger',
                 name: 'Swagger API',
-                isActive: true,
+                enabled: true,
                 url: 'https://transitoytransporte.sanjuan.gob.ar/swagger-ui/index.html'
             },
             {
                 id: 'enrollment',
                 name: 'Boleto Escolar (Inscripción)',
-                isActive: true,
+                enabled: true,
                 url: 'https://boletoescolar.sanjuan.gob.ar/'
             }
         ];
     },
 
-    updateStatus: async (id: string, isActive: boolean): Promise<void> => {
-        // IMPORTANTE: Eliminamos cualquier '/' inicial para que Axios use la baseURL correctamente
+    updateStatus: async (id: string, enabled: boolean): Promise<void> => {
         const path = id === 'swagger'
             ? 'admin/configs/swagger'
             : 'admin/configs/enrollment';
 
         try {
-            /**
-             * NOTA TÉCNICA: 
-             * Si el backend sigue dando 403 o 400, prueba cambiar { isActive } 
-             * por { status: isActive } o { value: isActive } según la documentación del Swagger.
-             */
             const response = await api.patch(path, { 
-                isActive: Boolean(isActive) // Aseguramos que sea booleano puro
+                enabled: Boolean(enabled) 
             });
 
             if (import.meta.env.VITE_APP_ENV !== 'prod') {

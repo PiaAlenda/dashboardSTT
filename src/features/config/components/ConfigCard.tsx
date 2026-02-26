@@ -12,7 +12,7 @@ export const ConfigCard: React.FC<ConfigCardProps> = ({ site, isUpdating, onTogg
     
     // Función para abrir la web en pestaña nueva (evita el bloqueo de iframe)
     const handlePreviewClick = () => {
-        if (site.isActive) {
+        if (site.enabled) {
             window.open(site.url, '_blank', 'noopener,noreferrer');
         }
     };
@@ -23,15 +23,15 @@ export const ConfigCard: React.FC<ConfigCardProps> = ({ site, isUpdating, onTogg
             {/* 1. Header de la Card */}
             <div className="p-8 flex items-center justify-between border-b border-slate-50 bg-white">
                 <div className="flex items-center gap-4">
-                    <div className={`p-4 rounded-[1.5rem] transition-all duration-500 ${site.isActive ? 'bg-orange-100 text-[#ff8200] scale-110 shadow-lg shadow-orange-100' : 'bg-slate-100 text-slate-400'}`}>
+                    <div className={`p-4 rounded-[1.5rem] transition-all duration-500 ${site.enabled ? 'bg-orange-100 text-[#ff8200] scale-110 shadow-lg shadow-orange-100' : 'bg-slate-100 text-slate-400'}`}>
                         {site.id === 'swagger' ? <Shield size={26} /> : <Globe size={26} />}
                     </div>
                     <div>
                         <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight">{site.name}</h3>
                         <div className="flex items-center gap-2 mt-1">
-                            <div className={`h-2 w-2 rounded-full ${site.isActive ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
-                            <span className={`text-[11px] font-black uppercase tracking-widest ${site.isActive ? 'text-green-600' : 'text-red-500'}`}>
-                                {site.isActive ? 'Sistema en línea' : 'Desconectado'}
+                            <div className={`h-2 w-2 rounded-full ${site.enabled ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
+                            <span className={`text-[11px] font-black uppercase tracking-widest ${site.enabled ? 'text-green-600' : 'text-red-500'}`}>
+                                {site.enabled ? 'Sistema en línea' : 'Desconectado'}
                             </span>
                         </div>
                     </div>
@@ -43,8 +43,8 @@ export const ConfigCard: React.FC<ConfigCardProps> = ({ site, isUpdating, onTogg
                         <input
                             type="checkbox"
                             className="sr-only peer"
-                            checked={site.isActive}
-                            onChange={() => onToggle(site.id, site.isActive)}
+                            checked={site.enabled}
+                            onChange={() => onToggle(site.id, site.enabled)}
                             disabled={isUpdating}
                         />
                         <div className="w-20 h-10 bg-slate-200 rounded-full peer peer-checked:bg-slate-900 transition-all duration-300 relative border-4 border-slate-100 shadow-inner">
@@ -55,7 +55,7 @@ export const ConfigCard: React.FC<ConfigCardProps> = ({ site, isUpdating, onTogg
                                 {isUpdating ? (
                                     <Activity size={10} className="animate-spin text-[#ff8200]" />
                                 ) : (
-                                    site.isActive && <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                                    site.enabled && <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
                                 )}
                             </div>
                         </div>
@@ -68,7 +68,7 @@ export const ConfigCard: React.FC<ConfigCardProps> = ({ site, isUpdating, onTogg
             <div className="p-8 space-y-4 flex-1 flex flex-col bg-slate-50/30">
                 <div className="flex items-center justify-between px-2">
                     <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                        <Terminal size={14} className={site.isActive ? 'text-[#ff8200]' : 'text-slate-300'} /> 
+                        <Terminal size={14} className={site.enabled ? 'text-[#ff8200]' : 'text-slate-300'} /> 
                         Consola de Infraestructura
                     </span>
                     <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest italic opacity-60">
@@ -80,12 +80,12 @@ export const ConfigCard: React.FC<ConfigCardProps> = ({ site, isUpdating, onTogg
                 <div 
                     onClick={handlePreviewClick}
                     className={`relative flex-1 w-full rounded-[2.5rem] border-4 border-white shadow-xl overflow-hidden transition-all duration-500 flex flex-col items-center justify-center ${
-                        site.isActive 
+                        site.enabled 
                         ? 'bg-slate-900 cursor-pointer hover:scale-[1.02] active:scale-[0.98] group/preview' 
                         : 'bg-slate-200 cursor-not-allowed'
                     }`}
                 >
-                    {site.isActive ? (
+                    {site.enabled ? (
                         <>
                             {/* Vista de Sistema Activo */}
                             <div className="flex flex-col items-center text-center p-8 space-y-5 animate-in zoom-in-95 duration-500">

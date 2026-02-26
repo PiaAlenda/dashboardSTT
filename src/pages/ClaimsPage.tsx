@@ -7,8 +7,6 @@ import { ClaimsFilter } from '../features/claims/components/ClaimsFilter';
 import { LoadingOverlay } from '../components/ui/LoadingOverlay';
 import { Pagination } from '../components/ui/Pagination';
 
-const sanitize = (text: string) => text?.replace(/^"|"$/g, '') || '';
-
 export const ClaimsPage = () => {
     const {
         claims, isLoading, searchTerm, setSearchTerm,
@@ -22,25 +20,21 @@ export const ClaimsPage = () => {
         setCurrentPage(1);
     }, [searchTerm, showAnswered]);
 
-    const filteredClaims = useMemo(() => {
+    const filteredThreads = useMemo(() => {
         return claims
-            .filter(claim => {
-                const hasResponse = !!claim.replyMessage || !!claim.answer;
-                return hasResponse === showAnswered;
-            })
-            .map(claim => ({
-                ...claim,
-                cause: sanitize(claim.cause),
-                description: sanitize(claim.description || ''),
-                replyMessage: sanitize(claim.replyMessage || claim.answer || '')
-            }));
+            .filter(thread => {
+                const hasAnyPending = thread.claims.some(c => c.status === 'PENDIENTE');
+                // Si hay AL MENOS UN pendiente, el hilo va a "Pendientes" (showAnswered false).
+                // Si NO hay pendientes (todos contestados), va a "Contestados" (showAnswered true).
+                return showAnswered ? !hasAnyPending : hasAnyPending;
+            });
     }, [claims, showAnswered]);
 
-    const totalPages = Math.ceil(filteredClaims.length / itemsPerPage);
+    const totalPages = Math.ceil(filteredThreads.length / itemsPerPage);
     const paginatedClaims = useMemo(() => {
         const start = (currentPage - 1) * itemsPerPage;
-        return filteredClaims.slice(start, start + itemsPerPage);
-    }, [filteredClaims, currentPage]);
+        return filteredThreads.slice(start, start + itemsPerPage);
+    }, [filteredThreads, currentPage]);
 
     if (isLoading) {
         return <LoadingOverlay message="Sincronizando Reclamos Ciudadanos..." />;
@@ -110,6 +104,7 @@ export const ClaimsPage = () => {
             <ClaimReplyModal
                 isOpen={!!selectedClaim}
                 claim={selectedClaim}
+                claims={selectedClaim?.claims || []}
                 isSubmitting={answerMutation.isPending}
                 onAnswer={(id, text) => answerMutation.mutate({ id, answer: text })}
                 onClose={() => setSelectedClaim(null)}
@@ -117,7 +112,6 @@ export const ClaimsPage = () => {
         </div>
     );
 };
-// --- SUB-COMPONENTES LOCALES ---
 
 const HeaderTitle = () => (
     <div className="flex items-center gap-4">

@@ -8,10 +8,14 @@ export const BottomNav: React.FC = () => {
     const { user } = useAuth();
     const location = useLocation();
 
-    const filteredItems = useMemo(() =>
-        user ? NAV_ITEMS.filter(item => item.roles.includes(user.role as Role)) : [],
-        [user]
-    );
+    const filteredItems = useMemo(() => {
+        if (!user) return [];
+        return NAV_ITEMS.filter(item => {
+            const hasRole = item.roles.includes(user.role as Role);
+            const isUsernameAllowed = item.allowedUsernames ? item.allowedUsernames.includes(user.username) : true;
+            return hasRole && isUsernameAllowed;
+        });
+    }, [user]);
 
     const activeIndex = filteredItems.findIndex(item => location.pathname === item.path);
     if (!user || activeIndex === -1) return null;
@@ -75,8 +79,8 @@ export const BottomNav: React.FC = () => {
                         >
                             <div
                                 className={`transition-all duration-500 flex flex-col items-center ${isActive
-                                        ? "opacity-0 translate-y-4"
-                                        : "text-slate-400"
+                                    ? "opacity-0 translate-y-4"
+                                    : "text-slate-400"
                                     }`}
                             >
                                 <item.icon size={22} strokeWidth={2} />

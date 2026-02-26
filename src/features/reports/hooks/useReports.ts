@@ -111,16 +111,16 @@ export const useReports = (range: string = 'month') => {
     })), [levelStats]);
 
     const SOURCE_METADATA: Record<string, { name: string; color: string }> = {
-        '1': { name: 'Bot WhatsApp', color: '#22c55e' }, 
-        '2': { name: 'Formulario Web', color: '#3b82f6' }, 
-        '3': { name: 'Formulario Web MFyDH', color: '#8b5cf6' }, 
-        '4': { name: 'Bot WhatsApp MFyDH', color: '#10b981' }, 
+        '1': { name: 'Bot WhatsApp', color: '#22c55e' },
+        '2': { name: 'Formulario Web', color: '#3b82f6' },
+        '3': { name: 'Formulario Web MFyDH', color: '#8b5cf6' },
+        '4': { name: 'Bot WhatsApp MFyDH', color: '#10b981' },
     };
 
     const sourceStats = useMemo(() => filteredEnrollments.reduce((acc: Record<string, number>, curr: Enrollment) => {
         const rawSource = curr.dataSource ?? (curr as any).datasource ?? (curr as any).data_source;
 
-        let key = '2'; 
+        let key = '2';
 
         if (rawSource === null || rawSource === undefined || rawSource === 'null' || rawSource === 1 || rawSource === '1') {
             key = '1';
@@ -180,6 +180,54 @@ export const useReports = (range: string = 'month') => {
     const totalEnrollments = useMemo(() => stats.byStatus.reduce((acc, curr) => acc + curr.count, 0), [stats.byStatus]);
     const approvedCount = useMemo(() => stats.byStatus.find(s => s.name.toUpperCase() === 'APROBADO')?.count || 0, [stats.byStatus]);
 
+    // Real data from enrollments for bus lines
+    const busLinesChartData = useMemo(() => {
+        const counts: Record<string, number> = {};
+        const colors = ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ec4899', '#6366f1', '#f43f5e', '#14b8a6'];
+
+        filteredEnrollments.forEach((e: any) => {
+            for (let i = 1; i <= 10; i++) {
+                const lineName = e[`busLine${i}Name`];
+                if (lineName && typeof lineName === 'string' && lineName.trim() !== '') {
+                    const normalized = lineName.trim();
+                    counts[normalized] = (counts[normalized] || 0) + 1;
+                }
+            }
+        });
+
+        return Object.entries(counts)
+            .map(([name, value], index) => ({
+                name,
+                value,
+                color: colors[index % colors.length]
+            }))
+            .sort((a, b) => b.value - a.value);
+    }, [filteredEnrollments]);
+
+    // Real data from enrollments for bus companies
+    const busCompaniesChartData = useMemo(() => {
+        const counts: Record<string, number> = {};
+        const colors = ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ec4899', '#6366f1', '#f43f5e', '#14b8a6'];
+
+        filteredEnrollments.forEach((e: any) => {
+            for (let i = 1; i <= 10; i++) {
+                const companyName = e[`busCompany${i}Name`];
+                if (companyName && typeof companyName === 'string' && companyName.trim() !== '') {
+                    const normalized = companyName.trim();
+                    counts[normalized] = (counts[normalized] || 0) + 1;
+                }
+            }
+        });
+
+        return Object.entries(counts)
+            .map(([name, value], index) => ({
+                name,
+                value,
+                color: colors[index % colors.length]
+            }))
+            .sort((a, b) => b.value - a.value);
+    }, [filteredEnrollments]);
+
     const statsGrid = useMemo(() => [
         {
             label: "Total Inscripciones",
@@ -196,11 +244,11 @@ export const useReports = (range: string = 'month') => {
             value: claims.filter((c: any) => c.status === 'PENDIENTE').length.toString(),
             color: 'blue' as const
         },
-        // {
-        //     label: "Beneficiarios",
-        //     value: totalEnrollments.toLocaleString(),
-        //     color: 'purple' as const
-        // },
+        {
+            label: "Reclamos Contestados",
+            value: claims.filter((c: any) => c.status === 'RESPONDIDO' || c.status === 'CONTESTADO').length.toString(),
+            color: 'emerald' as const
+        },
     ], [totalEnrollments, approvedCount, claims]);
 
     return {
@@ -211,7 +259,9 @@ export const useReports = (range: string = 'month') => {
             beneficiary: beneficiaryChartData,
             level: levelChartData,
             source: sourceChartData,
-            rejection: rejectionChartData
+            rejection: rejectionChartData,
+            busLines: busLinesChartData,
+            busCompanies: busCompaniesChartData
         },
         statsGrid
     };

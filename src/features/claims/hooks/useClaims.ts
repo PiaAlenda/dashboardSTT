@@ -6,7 +6,7 @@ import type { Claim } from '../../../types';
 export const useClaims = () => {
     const queryClient = useQueryClient();
     const [searchTerm, setSearchTerm] = useState('');
-    const [selectedClaim, setSelectedClaim] = useState<Claim | null>(null);
+    const [selectedClaim, setSelectedClaim] = useState<any | null>(null);
 
     const { data: claimsResponse, isLoading } = useQuery({
         queryKey: ['claims'],
@@ -27,18 +27,58 @@ export const useClaims = () => {
         }
     });
 
-    const filteredClaims = useMemo(() => {
+    const claimsByDni = useMemo(() => {
         if (!claims) return [];
-        const term = searchTerm.toLowerCase();
-        return claims.filter((c: Claim) =>
-            c.cause?.toLowerCase().includes(term) ||
-            c.dni?.includes(term) ||
-            c.trackingCode?.toLowerCase().includes(term)
+
+        const groups: Record<string, {
+            dni: string;
+            name: string;
+            email: string;
+            claims: Claim[];
+            lastUpdate: string;
+            totalClaims: number;
+        }> = {};
+
+        claims.forEach((c: Claim) => {
+            if (!groups[c.dni]) {
+                groups[c.dni] = {
+                    dni: c.dni,
+                    name: (c as any).firstName ? `${(c as any).firstName} ${(c as any).lastName}` : 'Usuario',
+                    email: c.email,
+                    claims: [],
+                    lastUpdate: c.createdAt,
+                    totalClaims: 0
+                };
+            }
+            groups[c.dni].claims.push(c);
+            groups[c.dni].totalClaims++;
+            if (new Date(c.createdAt) > new Date(groups[c.dni].lastUpdate)) {
+                groups[c.dni].lastUpdate = c.createdAt;
+            }
+        });
+
+        // Ordenamos los reclamos dentro de cada grupo por fecha descendente
+        Object.values(groups).forEach(group => {
+            group.claims.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        });
+
+        return Object.values(groups).sort((a, b) =>
+            new Date(b.lastUpdate).getTime() - new Date(a.lastUpdate).getTime()
         );
-    }, [claims, searchTerm]);
+    }, [claims]);
+
+    const filteredThreads = useMemo(() => {
+        const term = searchTerm.toLowerCase();
+        return claimsByDni.filter(group =>
+            group.dni.includes(term) ||
+            group.name.toLowerCase().includes(term) ||
+            group.email.toLowerCase().includes(term) ||
+            group.claims.some(c => c.cause?.toLowerCase().includes(term) || c.trackingCode?.toLowerCase().includes(term))
+        );
+    }, [claimsByDni, searchTerm]);
 
     return {
-        claims: filteredClaims,
+        claims: filteredThreads,
         isLoading,
         searchTerm,
         setSearchTerm,

@@ -21,12 +21,19 @@ export const useEnrollments = () => {
 
     // Estado de Filtros
     const [filters, setFilters] = useState({
+        // Estados
         PENDIENTE: false,
         EN_PROCESO: false,
         APROBADO: false,
         RECHAZADO: false,
         CANCELADO: false,
-        SUSPENDIDO: false
+        SUSPENDIDO: false,
+        // Niveles Educativos
+        INICIAL: false,
+        PRIMARIO: false,
+        SECUNDARIO: false,
+        'SUPERIOR/TECNICO': false,
+        UNIVERSITARIO: false
     });
 
     // Queries: Datos maestros y lista principal
@@ -47,7 +54,7 @@ export const useEnrollments = () => {
 
         return list.map(e => {
             const dTramite = e.dniTramite || (e as any).dni_tramite || (e as any).tramite || e.customField1;
-            
+
             let rejectionReasonName = e.rejectionReasonName || e.rejectionReason;
 
             // Si es RECHAZADO y no tiene nombre de motivo, lo buscamos en rejectionReasons por ID
@@ -70,43 +77,68 @@ export const useEnrollments = () => {
     // Filtrado Inteligente con Búsqueda por Tipo de Reclamo y Rechazos
     const filteredEnrollments = useMemo(() => {
         const term = searchTerm.toLowerCase().trim();
-        const anyFilterActive = Object.values(filters).some(Boolean);
+
+        // Separamos filtros por categoría
+        const statusKeys = ['PENDIENTE', 'EN_PROCESO', 'APROBADO', 'RECHAZADO', 'CANCELADO', 'SUSPENDIDO'];
+        const educationKeys = ['INICIAL', 'PRIMARIO', 'SECUNDARIO', 'SUPERIOR/TECNICO', 'UNIVERSITARIO'];
+
+        const activeStatusFilters = statusKeys.filter(k => (filters as any)[k]);
+        const activeEducationFilters = educationKeys.filter(k => (filters as any)[k]);
 
         return allEnrollments.filter((e: Enrollment) => {
             const status = e.status?.toUpperCase() || '';
-            
-            // CAMPOS PARA BÚSQUEDA
-            const firstName = e.firstName || '';
-            const lastName = e.lastName || '';
-            const dni = e.dni || '';
-            const email = e.email || '';
-            const claimType = (e as any).claimType || (e as any).type || (e as any).tipo_reclamo || '';
-            const rejectionReason = e.rejectionReasonName || '';
-            const observation = e.observation || '';
 
-            // Creamos un "super string" con toda la info relevante del registro
-            const searchString = `
-                ${firstName} ${lastName} ${dni} ${email} 
-                ${claimType} ${rejectionReason} ${observation}
-            `.toLowerCase();
+            // Normalización para Niveles Educativos
+            let rawLevel = (e.educationLevel || '').toUpperCase();
+            let eLevel = '';
+            if (rawLevel.includes('INICIAL')) eLevel = 'INICIAL';
+            else if (rawLevel.includes('PRIMARIO')) eLevel = 'PRIMARIO';
+            else if (rawLevel.includes('SECUNDARIO')) eLevel = 'SECUNDARIO';
+            else if (rawLevel.includes('SUPERIOR') || rawLevel.includes('TECNICO')) eLevel = 'SUPERIOR/TECNICO';
+            else if (rawLevel.includes('UNIVERSITARIO')) eLevel = 'UNIVERSITARIO';
+
+            // CAMPOS PARA BÚSQUEDA
+            const firstName = (e.firstName || '').toLowerCase();
+            const lastName = (e.lastName || '').toLowerCase();
+            const dni = (e.dni || '').toLowerCase();
+            const email = (e.email || '').toLowerCase();
+            const rejectionReason = (e.rejectionReasonName || '').toLowerCase();
 
             // 1. LÓGICA DE BÚSQUEDA (Si hay texto, manda sobre los filtros)
             if (term !== '') {
+                const searchString = `${firstName} ${lastName} ${dni} ${email} ${rejectionReason}`;
                 return searchString.includes(term);
             }
 
-            // 2. LÓGICA DE FILTROS (Solo si el buscador está vacío)
-            if (filters.SUSPENDIDO) {
-                return e.deleted || status === 'SUSPENDIDA' || status === 'SUSPENDIDO';
+            // 2. LÓGICA DE FILTROS COMBINADOS
+
+            // Filtro de Suspendido es especial (mapea a deleted o status)
+            if (filters.SUSPENDIDO && !e.deleted && status !== 'SUSPENDIDA' && status !== 'SUSPENDIDO') {
+                return false;
             }
 
-            if (e.deleted) return false;
+            if (!filters.SUSPENDIDO && e.deleted) return false;
 
-            if (!anyFilterActive) {
-                return status === 'EN_PROCESO' || status === 'PENDIENTE';
+            // Filtro de Estado
+            if (activeStatusFilters.length > 0) {
+                if (!activeStatusFilters.includes(status === 'SUSPENDIDA' ? 'SUSPENDIDO' : status)) {
+                    return false;
+                }
+            } else {
+                // Si no hay filtros de estado activos, por defecto mostramos Procesando/Pendiente (vistas operativas)
+                if (!filters.SUSPENDIDO && status !== 'EN_PROCESO' && status !== 'PENDIENTE' && !activeEducationFilters.length) {
+                    return false;
+                }
             }
 
-            return (filters as any)[status];
+            // Filtro de Nivel Educativo
+            if (activeEducationFilters.length > 0) {
+                if (!activeEducationFilters.includes(eLevel)) {
+                    return false;
+                }
+            }
+
+            return true;
         });
     }, [allEnrollments, searchTerm, filters]);
 
@@ -154,11 +186,27 @@ export const useEnrollments = () => {
         }
     };
 
-    const toggleFilter = (filterKey: keyof typeof filters) => {
-        setFilters(prev => ({
-            PENDIENTE: false, EN_PROCESO: false, APROBADO: false, RECHAZADO: false, CANCELADO: false, SUSPENDIDO: false,
-            [filterKey]: !prev[filterKey]
-        }));
+    const toggleFilter = (filterKey: string) => {
+        const statusKeys = ['PENDIENTE', 'EN_PROCESO', 'APROBADO', 'RECHAZADO', 'CANCELADO', 'SUSPENDIDO'];
+        const educationKeys = ['INICIAL', 'PRIMARIO', 'SECUNDARIO', 'SUPERIOR/TECNICO', 'UNIVERSITARIO'];
+
+        setFilters(prev => {
+            const newState = { ...prev } as any;
+
+            if (statusKeys.includes(filterKey)) {
+                // Si tocamos un estado, deseleccionamos otros estados pero MANTENEMOS niveles
+                statusKeys.forEach(k => {
+                    newState[k] = (k === filterKey) ? !prev[k as keyof typeof prev] : false;
+                });
+            } else if (educationKeys.includes(filterKey)) {
+                // Si tocamos un nivel, deseleccionamos otros niveles pero MANTENEMOS estados
+                educationKeys.forEach(k => {
+                    newState[k] = (k === filterKey) ? !prev[k as keyof typeof prev] : false;
+                });
+            }
+
+            return newState;
+        });
     };
 
     // Historial

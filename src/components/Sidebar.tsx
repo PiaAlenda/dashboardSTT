@@ -18,6 +18,7 @@ export interface NavItem {
     icon: React.ElementType;
     path: string;
     roles: Role[];
+    allowedUsernames?: string[];
 }
 
 export const NAV_ITEMS: NavItem[] = [
@@ -25,7 +26,7 @@ export const NAV_ITEMS: NavItem[] = [
     { label: 'Reclamos', icon: MessageSquare, path: '/4a12b69c3dcb/f7e8d9c0b1a2', roles: ['ROLE_SUPER_ADMIN', 'ROLE_ADMIN', 'ROLE_AUDITOR'] },
     { label: 'Usuarios', icon: Users, path: '/4a12b69c3dcb/d3e4f5a6b7c8', roles: ['ROLE_SUPER_ADMIN'] },
     { label: 'Reportes', icon: BarChart3, path: '/4a12b69c3dcb/a3b2c1d0e9f8', roles: ['ROLE_SUPER_ADMIN', 'ROLE_ADMIN'] },
-    { label: 'Configuración', icon: Settings, path: '/4a12b69c3dcb/c0nfig', roles: ['ROLE_SUPER_ADMIN'] },
+    { label: 'Configuración', icon: Settings, path: '/4a12b69c3dcb/c0nfig', roles: ['ROLE_SUPER_ADMIN'], allowedUsernames: ['falenda'] },
 ];
 
 export const Sidebar: React.FC = () => {
@@ -33,9 +34,12 @@ export const Sidebar: React.FC = () => {
     const navigate = useNavigate(); // Declaramos la función navigate
     const [isCollapsed, setIsCollapsed] = useState(false);
 
-    const filteredItems = NAV_ITEMS.filter(item =>
-        user && item.roles.includes(user.role as Role)
-    );
+    const filteredItems = NAV_ITEMS.filter(item => {
+        if (!user) return false;
+        const hasRole = item.roles.includes(user.role as Role);
+        const isUsernameAllowed = item.allowedUsernames ? item.allowedUsernames.includes(user.username) : true;
+        return hasRole && isUsernameAllowed;
+    });
 
     return (
         <>

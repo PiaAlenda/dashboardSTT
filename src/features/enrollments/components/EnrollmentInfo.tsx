@@ -110,6 +110,27 @@ export const EnrollmentInfo = ({ enrollment, onManageStatus, onReject, onDelete 
                         <p className="text-[9px] font-black uppercase text-slate-400 mb-0.5 tracking-wider">Nivel de Estudios</p>
                         <p className="text-xs font-bold text-slate-700">{enrollment.educationLevel || '---'}</p>
                     </div>
+                    {/* Bus Lines Display */}
+                    {(() => {
+                        const lines = [];
+                        for (let i = 1; i <= 10; i++) {
+                            const line = (enrollment as any)[`busLine${i}Name`];
+                            if (line && line.trim()) lines.push(line);
+                        }
+                        if (lines.length === 0) return null;
+                        return (
+                            <div className="p-4 bg-orange-50/30 border border-orange-100/50 rounded-2xl shadow-sm col-span-1 sm:col-span-2 lg:col-span-1">
+                                <p className="text-[9px] font-black uppercase text-[#ff8200] mb-0.5 tracking-wider">Líneas de Transporte</p>
+                                <div className="flex flex-wrap gap-1.5 mt-1">
+                                    {lines.map((l, idx) => (
+                                        <span key={idx} className="px-2 py-0.5 bg-white border border-orange-100 text-[10px] font-bold text-slate-600 rounded-md shadow-sm">
+                                            {l}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        );
+                    })()}
                     {/*{(enrollment.courseGrade || enrollment.courseDivision) && (
                         <div className="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm">
                             <p className="text-[9px] font-black uppercase text-slate-400 mb-0.5 tracking-wider">Curso / División</p>

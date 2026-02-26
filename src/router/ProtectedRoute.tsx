@@ -6,11 +6,13 @@ import type { Role } from '../types';
 interface ProtectedRouteProps {
     children: React.ReactNode;
     allowedRoles?: Role[];
+    allowedUsernames?: string[];
 }
 
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     children,
-    allowedRoles
+    allowedRoles,
+    allowedUsernames
 }) => {
     const { isAuthenticated, user, isLoading } = useAuth();
     const location = useLocation();
@@ -26,16 +28,20 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     }
 
     // 2. Si no está autenticado, lo mandamos al login
-    // Guardamos la ubicación actual en 'state' para poder volver después del login
     if (!isAuthenticated) {
         return <Navigate to="/auth/x82b9" state={{ from: location }} replace />;
     }
 
-    // 3. Si está autenticado pero el ROL no está permitido para esta ruta específica
+    // 3. Si está autenticado pero el ROL no está permitido
     if (allowedRoles && user && !allowedRoles.includes(user.role)) {
         return <Navigate to="/unauthorized" replace />;
     }
 
-    // 4. Si todo está ok, renderizamos el contenido
+    // 4. Si hay restricción por NOMBRE DE USUARIO específico
+    if (allowedUsernames && user && !allowedUsernames.includes(user.username)) {
+        return <Navigate to="/unauthorized" replace />;
+    }
+
+    // 5. Si todo está ok, renderizamos el contenido
     return <>{children}</>;
 };

@@ -12,7 +12,15 @@ import { ReportsPage } from './pages/ReportsPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { ConfigPage } from './pages/ConfigPage';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchInterval: 1000 * 60 * 5, // Auto-actualizar cada 5 minutos
+      refetchOnWindowFocus: true,     // Refrescar al volver a la pestaña
+      retry: 2,
+    },
+  },
+});
 
 function App() {
   return (
@@ -65,7 +73,7 @@ function App() {
             <Route
               path="/4a12b69c3dcb/c0nfig"
               element={
-                <ProtectedRoute allowedRoles={['ROLE_SUPER_ADMIN']}>
+                <ProtectedRoute allowedRoles={['ROLE_SUPER_ADMIN']} allowedUsernames={['falenda']}>
                   <MainLayout>
                     <ConfigPage />
                   </MainLayout>

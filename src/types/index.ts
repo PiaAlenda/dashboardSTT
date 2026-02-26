@@ -69,6 +69,11 @@ export interface Claim {
     replyMessage?: string;
     createdAt: string;
     answeredAt?: string;
+    firstName?: string;
+    lastName?: string;
+    answeredBy?: string;
+    auditorName?: string;
+    userName?: string;
 }
 
 export interface Statistics {

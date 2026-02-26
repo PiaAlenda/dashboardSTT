@@ -111,7 +111,7 @@ export const EnrollmentModals = ({ state, actions }: EnrollmentModalsProps) => {
                 isOpen={!!state.dniToDelete}
                 onClose={() => actions.setDniToDelete(null)}
                 dni={state.dniToDelete}
-                onConfirm={(dni) => actions.deleteMutation.mutate({ dni })}
+                onConfirm={(dni) => actions.statusMutation.mutate({ dni, status: 'SUSPENDIDA' })}
             />
         </>
     );
@@ -168,9 +168,9 @@ const StatusModal = ({ isOpen, onClose, dni, currentStatus, onUpdateStatus }: St
                 {['PENDIENTE', 'EN_PROCESO', 'APROBADO', 'CANCELADO'].map((status) => (
                     currentStatus.toUpperCase() !== status && (
                         <button key={status} onClick={() => { onUpdateStatus(dni, status); onClose(); }} className={`w-full py-4 rounded-2xl font-black uppercase text-[10px] flex items-center justify-center gap-2 transition-all ${status === 'PENDIENTE' ? 'bg-amber-50 text-amber-600 hover:bg-amber-500 hover:text-white' :
-                                status === 'EN_PROCESO' ? 'bg-blue-50 text-blue-600 hover:bg-blue-500 hover:text-white' :
-                                    status === 'CANCELADO' ? 'bg-slate-100 text-slate-500 hover:bg-slate-600 hover:text-white' :
-                                        'bg-green-50 text-green-600 hover:bg-green-500 hover:text-white'
+                            status === 'EN_PROCESO' ? 'bg-blue-50 text-blue-600 hover:bg-blue-500 hover:text-white' :
+                                status === 'CANCELADO' ? 'bg-slate-100 text-slate-500 hover:bg-slate-600 hover:text-white' :
+                                    'bg-green-50 text-green-600 hover:bg-green-500 hover:text-white'
                             }`}>
                             {status === 'PENDIENTE' ? <Clock size={16} /> :
                                 status === 'EN_PROCESO' ? <RefreshCcw size={16} /> :

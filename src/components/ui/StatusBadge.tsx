@@ -1,4 +1,4 @@
-import { Trash2, CheckCircle2, Clock, XCircle, Ban, RefreshCcw, ShieldCheck } from 'lucide-react';
+import { Trash2, CheckCircle2, Clock, XCircle, Ban, RefreshCcw, AlertCircle } from 'lucide-react';
 
 interface StatusBadgeProps {
     status?: string;
@@ -7,7 +7,6 @@ interface StatusBadgeProps {
 }
 
 export const StatusBadge = ({ status, isDeleted, className = '' }: StatusBadgeProps) => {
-    // Estilo base común para que todos se vean igual de grandes
     const baseStyle = "inline-flex items-center gap-2 rounded-2xl border-2 px-4 py-2 text-[10px] font-black uppercase tracking-[0.1em] shadow-sm transition-all";
 
     if (isDeleted) return (
@@ -23,7 +22,7 @@ export const StatusBadge = ({ status, isDeleted, className = '' }: StatusBadgePr
         'RECHAZADO': { style: "bg-red-50 text-red-700 border-red-200", icon: XCircle, label: '' },
         'CANCELADO': { style: "bg-slate-100 text-slate-500 border-slate-300", icon: Ban, label: '' },
         'EN_PROCESO': { style: "bg-blue-50 text-blue-700 border-blue-200", icon: RefreshCcw, label: '' },
-        'SUSPENDIDA': { style: "bg-purple-50 text-purple-700 border-purple-200", icon: ShieldCheck, label: '' }
+        'SUSPENDIDA': { style: "bg-slate-100 border-slate-200 text-slate-400", icon: AlertCircle, label: '' }
     };
 
     const active = config[s] || { style: "bg-slate-50 text-slate-700 border-slate-200", icon: Clock, label: s || 'Desconocido' };

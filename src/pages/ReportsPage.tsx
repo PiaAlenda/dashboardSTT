@@ -7,6 +7,8 @@ import { ShiftChart } from '../features/reports/components/ShiftChart';
 import { LevelChart } from '../features/reports/components/LevelChart';
 import { SourceChart } from '../features/reports/components/SourceChart';
 import { RejectionChart } from '../features/reports/components/RejectionChart';
+//import { LinesChart } from '../features/reports/components/LinesChart';
+import { CompanyChart } from '../features/reports/components/CompanyChart';
 import { ChartModal } from '../features/reports/components/ChartModal';
 import { useReports } from '../features/reports/hooks/useReports';
 import { LoadingOverlay } from '../components/ui/LoadingOverlay';
@@ -112,7 +114,7 @@ export const ReportsPage = () => {
                     ))}
                 </div>
             </section>
-            
+
             {/* GRILLA DE GRÁFICOS (Charts) */}
             <section className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8 px-2">
                 <AnalyticsCard
@@ -185,6 +187,30 @@ export const ReportsPage = () => {
                     })}
                 >
                     {(type) => <RejectionChart type={type} data={charts.rejection} />}
+                </AnalyticsCard>
+
+                {/*<AnalyticsCard
+                    title="Líneas de Colectivo"
+                    subtitle="Impacto por línea de transporte (130 líneas)"
+                    onExpand={() => setExpandedChart({
+                        title: "Líneas de Colectivo",
+                        component: <LinesChart type="bar" data={charts.busLines} />,
+                        data: charts.busLines
+                    })}
+                >
+                    {(type) => <LinesChart type={type} data={charts.busLines} />}
+                </AnalyticsCard> */}
+
+                <AnalyticsCard
+                    title="Empresas de Colectivo"
+                    subtitle="Distribución por prestataria"
+                    onExpand={() => setExpandedChart({
+                        title: "Empresas de Colectivo",
+                        component: <CompanyChart type="bar" data={charts.busCompanies} />,
+                        data: charts.busCompanies
+                    })}
+                >
+                    {(type) => <CompanyChart type={type} data={charts.busCompanies} />}
                 </AnalyticsCard>
             </section>
         </div>
