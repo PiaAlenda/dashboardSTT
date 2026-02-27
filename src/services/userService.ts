@@ -1,5 +1,6 @@
 import api from './api';
 import type { User } from '../types';
+import type { UserResponse } from './authService';
 
 export const userService = {
     getAll: async (): Promise<User[]> => {
@@ -20,7 +21,26 @@ export const userService = {
         return response.data;
     },
 
-    update: async (dni: string, userData: any): Promise<void> => {
-        await api.put(`admin/users/${dni}`, userData);
+    update: async (dni: string, userData: any): Promise<UserResponse> => {
+        // Para administración: podemos cambiar rol y otros datos
+        const payload = {
+            firstName: userData.firstName,
+            lastName: userData.lastName,
+            email: userData.email,
+            role: userData.role
+        };
+        const response = await api.patch<UserResponse>(`admin/users/${dni}`, payload);
+        return response.data;
+    },
+
+    updateMe: async (userData: any): Promise<UserResponse> => {
+        // Para uso personal: el backend suele restringir qué campos puede editar uno mismo
+        const payload = {
+            firstName: userData.firstName,
+            lastName: userData.lastName,
+            email: userData.email
+        };
+        const response = await api.patch<UserResponse>(`admin/users/me`, payload);
+        return response.data;
     },
 };

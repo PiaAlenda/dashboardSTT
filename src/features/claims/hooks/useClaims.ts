@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { claimService } from '../../../services/claimService';
-import type { Claim } from '../../../types';
+import type { Claim } from '../../../types/index';
 
 export const useClaims = () => {
     const queryClient = useQueryClient();
@@ -77,6 +77,21 @@ export const useClaims = () => {
         );
     }, [claimsByDni, searchTerm]);
 
+    const ranking = useMemo(() => {
+        if (!claims) return [];
+        const userCounts: Record<string, { name: string; count: number }> = {};
+        claims.forEach((c: Claim) => {
+            if (c.status === 'RESPONDIDO' || c.status === 'CONTESTADO') {
+                const name = c.auditorName || c.userName || c.answeredBy || 'Usuario Desconocido';
+                if (!userCounts[name]) userCounts[name] = { name, count: 0 };
+                userCounts[name].count++;
+            }
+        });
+        return Object.values(userCounts)
+            .sort((a, b) => b.count - a.count)
+            .slice(0, 10);
+    }, [claims]);
+
     return {
         claims: filteredThreads,
         isLoading,
@@ -84,6 +99,7 @@ export const useClaims = () => {
         setSearchTerm,
         selectedClaim,
         setSelectedClaim,
-        answerMutation
+        answerMutation,
+        ranking
     };
 };

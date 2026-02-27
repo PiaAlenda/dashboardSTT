@@ -17,6 +17,7 @@ export interface UserResponse {
 }
 
 const mapRole = (backendRole: string): Role => {
+    // Aseguramos que el rol coincida con el enum de tu frontend
     if (backendRole === 'ROLE_SUPER_ADMIN') return 'ROLE_SUPER_ADMIN';
     return backendRole as Role;
 };
@@ -28,25 +29,21 @@ export const authService = {
 
         if (data.token) {
             localStorage.setItem('sube_token', data.token);
+            // No es estrictamente necesario setear defaults si usas interceptores, 
+            // pero ayuda a la consistencia.
             api.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
-            console.log("Token guardado y Header actualizado");
         }
 
         return data;
     },
 
     getMe: async (): Promise<User> => {
-        // Verificamos si tenemos token antes de pedir nada
         const token = localStorage.getItem('sube_token');
-        if (!token) {
-            console.error("No hay token en localStorage para getMe");
-            throw new Error("No hay sesión activa");
-        }
+        if (!token) throw new Error("No hay sesión activa");
 
         try {
             const response = await api.get<UserResponse>('/admin/users/me');
             const userData = response.data;
-
             localStorage.setItem('sube_user', JSON.stringify(userData));
 
             return {
@@ -54,18 +51,21 @@ export const authService = {
                 role: mapRole(userData.role)
             };
         } catch (error: any) {
-            console.error("Error en getMe detallado:", {
-                status: error.response?.status,
-                message: error.response?.data?.message || error.message,
-                url: error.config?.url
-            });
+            console.error("Error en getMe:", error.response?.data || error.message);
             throw error;
         }
     },
 
     register: async (userData: any): Promise<void> => {
-        // Agregamos '/' inicial
-        await api.post('/auth/register', userData);
+        // CORRECCIÓN: Formateamos el objeto para que el backend no lo rechace
+        const formattedData = {
+            ...userData,
+            id: Number(userData.id) || 0, // Convertir a número (0 si es nuevo)
+            deleted: userData.deleted ?? false, // Asegurar que sea booleano
+        };
+        
+        // El backend espera el objeto limpio
+        await api.post('/auth/register', formattedData);
     },
 
     logout: () => {

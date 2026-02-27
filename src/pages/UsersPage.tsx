@@ -12,7 +12,7 @@ export const UsersPage: React.FC = () => {
         users, isLoading,
         searchTerm, setSearchTerm,
         isModalOpen, setIsModalOpen,
-        isEditMode, handleCloseModal,
+        handleCloseModal,
         historyUserDni, setHistoryUserDni,
         dniToDelete, setDniToDelete,
         showDeleted, setShowDeleted,
@@ -22,9 +22,7 @@ export const UsersPage: React.FC = () => {
         deleteMutation,
         reactivateMutation,
         handleSubmit,
-        createMutation,
-        updateMutation,
-        handleEdit
+        createMutation
     } = useUsers();
 
     if (isLoading) {
@@ -91,8 +89,7 @@ export const UsersPage: React.FC = () => {
                         onToggleShowDeleted={setShowDeleted}
                         onViewHistory={setHistoryUserDni}
                         onDelete={setDniToDelete}
-                        onReactivate={(dni) => reactivateMutation.mutate(dni)}
-                        onEdit={handleEdit}
+                        onReactivate={(dni: string) => reactivateMutation.mutate(dni)}
                     />
                 </div>
 
@@ -116,8 +113,7 @@ export const UsersPage: React.FC = () => {
                 formData={formData}
                 setFormData={setFormData}
                 onSubmit={handleSubmit}
-                isSubmitting={createMutation.isPending || updateMutation.isPending}
-                isEditMode={isEditMode}
+                isSubmitting={createMutation.isPending}
             />
 
             <UserHistoryModal
@@ -131,7 +127,7 @@ export const UsersPage: React.FC = () => {
                 isOpen={!!dniToDelete}
                 onClose={() => setDniToDelete(null)}
                 dni={dniToDelete}
-                onConfirm={(dni) => deleteMutation.mutate(dni)}
+                onConfirm={(dni: string) => deleteMutation.mutate(dni)}
             />
         </div>
     );

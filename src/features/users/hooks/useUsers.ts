@@ -9,20 +9,20 @@ export const useUsers = () => {
     const queryClient = useQueryClient();
     const [searchTerm, setSearchTerm] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [isEditMode, setIsEditMode] = useState(false);
-    const [editingUserDni, setEditingUserDni] = useState<string | null>(null);
     const [historyUserDni, setHistoryUserDni] = useState<string | null>(null);
     const [dniToDelete, setDniToDelete] = useState<string | null>(null);
     const [showDeleted, setShowDeleted] = useState(false);
 
     const initialFormData = {
+        id: 0,
         firstName: '',
         lastName: '',
         dni: '',
         email: '',
         username: '',
         password: '',
-        role: 'ROLE_AUDITOR' as const
+        role: 'ROLE_AUDITOR',
+        deleted: false
     };
 
     const [formData, setFormData] = useState(initialFormData);
@@ -61,51 +61,25 @@ export const useUsers = () => {
         }
     });
 
-    const updateMutation = useMutation({
-        mutationFn: ({ dni, data }: { dni: string, data: any }) => userService.update(dni, data),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['users'] });
-            handleCloseModal();
-        }
-    });
-
-    const handleEdit = (user: any) => {
-        setIsEditMode(true);
-        setEditingUserDni(user.dni);
-        setFormData({
-            firstName: user.firstName || '',
-            lastName: user.lastName || '',
-            dni: user.dni || '',
-            email: user.email || '',
-            username: user.username || '',
-            password: '', // Password empty by default on edit
-            role: user.role || 'ROLE_AUDITOR'
-        });
-        setIsModalOpen(true);
-    };
-
     const handleCloseModal = () => {
         setIsModalOpen(false);
-        setIsEditMode(false);
-        setEditingUserDni(null);
         setFormData(initialFormData);
     };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+
         if (!isSuperAdmin) {
-            alert("Acceso denegado: Solo el SUPER_ADMIN puede gestionar usuarios.");
+            alert("Acceso denegado.");
             return;
         }
 
-        if (isEditMode && editingUserDni) {
-            // On edit, if password is empty, don't send it or handle it in service/backend
-            const { password, ...rest } = formData;
-            const updateData = password ? formData : rest;
-            updateMutation.mutate({ dni: editingUserDni, data: updateData });
-        } else {
-            createMutation.mutate(formData);
-        }
+        const payload = {
+            ...formData,
+            id: Number(formData.id)
+        };
+
+        createMutation.mutate(payload);
     };
 
     const filteredUsers = useMemo(() => {
@@ -121,7 +95,6 @@ export const useUsers = () => {
     }, [users, searchTerm, showDeleted]);
 
     return {
-        // State
         users: filteredUsers,
         isLoading,
         error,
@@ -129,7 +102,6 @@ export const useUsers = () => {
         setSearchTerm,
         isModalOpen,
         setIsModalOpen,
-        isEditMode,
         handleCloseModal,
         historyUserDni,
         setHistoryUserDni,
@@ -139,18 +111,12 @@ export const useUsers = () => {
         setShowDeleted,
         formData,
         setFormData,
-
-        // Derived
         isSuperAdmin,
         history,
         isLoadingHistory,
-
-        // Actions
         deleteMutation,
         reactivateMutation,
         createMutation,
-        updateMutation,
-        handleEdit,
         handleSubmit
     };
 };

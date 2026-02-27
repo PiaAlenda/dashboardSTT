@@ -1,18 +1,21 @@
 import { useState, useMemo, useEffect } from 'react';
-import { Search, MessageSquareQuote, FilterX, X as CloseIcon } from 'lucide-react';
+import { Search, MessageSquareQuote, FilterX, X as CloseIcon, Trophy } from 'lucide-react';
 import { useClaims } from '../features/claims/hooks/useClaims';
 import { ClaimTable } from '../features/claims/components/ClaimTable';
 import { ClaimReplyModal } from '../features/claims/components/ClaimReplyModal';
 import { ClaimsFilter } from '../features/claims/components/ClaimsFilter';
+import { ClaimsRankingModal } from '../features/claims/components/ClaimsRankingModal';
 import { LoadingOverlay } from '../components/ui/LoadingOverlay';
 import { Pagination } from '../components/ui/Pagination';
 
 export const ClaimsPage = () => {
     const {
         claims, isLoading, searchTerm, setSearchTerm,
-        selectedClaim, setSelectedClaim, answerMutation
+        selectedClaim, setSelectedClaim, answerMutation,
+        ranking
     } = useClaims();
     const [showAnswered, setShowAnswered] = useState(false);
+    const [isRankingOpen, setIsRankingOpen] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 50;
 
@@ -73,7 +76,15 @@ export const ClaimsPage = () => {
                         </button>
                     )}
                 </div>
-                <div className="shrink-0 w-full md:w-auto">
+                <div className="shrink-0 w-full md:w-auto flex items-center gap-3">
+                    <button
+                        onClick={() => setIsRankingOpen(true)}
+                        className="flex items-center gap-2 px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl text-[10px] 2xl:text-xs font-black uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-slate-200"
+                        title="Ver Ranking de Resolutores"
+                    >
+                        <Trophy size={16} className="text-[#ff8200] animate-trophy-periodic" />
+                        Top 10
+                    </button>
                     <ClaimsFilter
                         showAnswered={showAnswered}
                         onChange={setShowAnswered}
@@ -108,6 +119,12 @@ export const ClaimsPage = () => {
                 isSubmitting={answerMutation.isPending}
                 onAnswer={(id, text) => answerMutation.mutate({ id, answer: text })}
                 onClose={() => setSelectedClaim(null)}
+            />
+
+            <ClaimsRankingModal
+                isOpen={isRankingOpen}
+                onClose={() => setIsRankingOpen(false)}
+                ranking={ranking}
             />
         </div>
     );

@@ -1,4 +1,4 @@
-import { Mail, Clock, RotateCcw, Trash2, User as UserIcon, Fingerprint, Pencil } from 'lucide-react';
+import { Mail, Clock, RotateCcw, Trash2, User as UserIcon, Fingerprint } from 'lucide-react';
 
 interface UserTableProps {
     users: any[];
@@ -8,7 +8,6 @@ interface UserTableProps {
     onViewHistory: (dni: string) => void;
     onDelete: (dni: string) => void;
     onReactivate: (dni: string) => void;
-    onEdit: (user: any) => void;
 }
 
 export const UserTable = ({
@@ -18,8 +17,7 @@ export const UserTable = ({
     onToggleShowDeleted,
     onViewHistory,
     onDelete,
-    onReactivate,
-    onEdit
+    onReactivate
 }: UserTableProps) => {
     return (
         <div className="space-y-6">
@@ -112,15 +110,7 @@ export const UserTable = ({
                                             <Clock size={16} />
                                         </button>
 
-                                        {!u.deleted && (
-                                            <button
-                                                onClick={() => onEdit(u)}
-                                                className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded-xl transition-all"
-                                                title="Editar"
-                                            >
-                                                <Pencil size={16} />
-                                            </button>
-                                        )}
+
 
                                         {u.deleted ? (
                                             <button

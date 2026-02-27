@@ -4,11 +4,6 @@ import {
     AtSign, ShieldCheck, X, BadgeCheck, AlertCircle
 } from 'lucide-react';
 import { Modal } from '../../../components/ui/Modal';
-
-/**
- * COMPONENTE: FloatingInput
- * Maneja la etiqueta flotante y los estados de error/éxito visualmente.
- */
 const FloatingInput = ({
     label, icon: Icon, error, type = "text",
     showPasswordToggle, onTogglePassword, isPasswordVisible,
@@ -65,8 +60,7 @@ export const UserCreateForm = ({
     formData,
     setFormData,
     onSubmit,
-    isSubmitting,
-    isEditMode = false
+    isSubmitting
 }: any) => {
     const [showPass, setShowPass] = useState(false);
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -74,20 +68,13 @@ export const UserCreateForm = ({
 
     const passwordsMatch = formData.password && formData.password === confirmPassword;
 
-    /**
-     * RESET: Limpia todos los campos y errores al cerrar
-     */
     const handleCloseReset = () => {
         setErrors({});
         setConfirmPassword('');
         setShowPass(false);
-        // We don't clear formData here because useUsers handles it now in handleCloseModal
         onClose();
     };
 
-    /**
-     * EFECTO: Asegura la limpieza si el modal se cierra por otros medios (ESC, click fuera)
-     */
     useEffect(() => {
         if (!isOpen) {
             setErrors({});
@@ -96,9 +83,6 @@ export const UserCreateForm = ({
         }
     }, [isOpen]);
 
-    /**
-     * DNI: Solo permite números y máximo 8 caracteres
-     */
     const handleDniChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const val = e.target.value.replace(/\D/g, '');
         if (val.length <= 8) {
@@ -106,41 +90,26 @@ export const UserCreateForm = ({
         }
     };
 
-    /**
-     * VALIDACIÓN: Lógica de seguridad estricta
-     */
     const validate = () => {
         const e: any = {};
 
         if (!formData.firstName?.trim()) e.firstName = 'Requerido';
         if (!formData.lastName?.trim()) e.lastName = 'Requerido';
 
-        // Validación DNI: 7 u 8 números
         if (!/^\d{7,8}$/.test(formData.dni)) {
             e.dni = 'Requiere 7 u 8 números';
         }
 
-        // Validación Email: Formato correcto con @
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(formData.email)) {
             e.email = 'Email Inválido (Ej: usuario@mail.com)';
         }
 
-        // Validación Password: Solo requerida si no es edición o si se escribió algo
-        if (!isEditMode) {
-            if (!formData.password || formData.password.length < 8) {
-                e.password = 'Mínimo 8 caracteres';
-            }
-            if (!passwordsMatch) {
-                e.confirmPassword = 'Las contraseñas no coinciden';
-            }
-        } else if (formData.password) {
-            if (formData.password.length < 8) {
-                e.password = 'Mínimo 8 caracteres';
-            }
-            if (!passwordsMatch) {
-                e.confirmPassword = 'Las contraseñas no coinciden';
-            }
+        if (!formData.password || formData.password.length < 8) {
+            e.password = 'Mínimo 8 caracteres';
+        }
+        if (!passwordsMatch) {
+            e.confirmPassword = 'Las contraseñas no coinciden';
         }
 
         setErrors(e);
@@ -151,7 +120,7 @@ export const UserCreateForm = ({
         <Modal
             isOpen={isOpen}
             onClose={handleCloseReset}
-            title={isEditMode ? "Edición de Personal" : "Alta de Personal"}
+            title="Alta de Personal"
             maxWidth="4xl"
         >
             <form
@@ -193,7 +162,6 @@ export const UserCreateForm = ({
                             value={formData.dni || ''}
                             error={errors.dni}
                             onChange={handleDniChange}
-                            readOnly={isEditMode}
                         />
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -224,7 +192,7 @@ export const UserCreateForm = ({
 
                         <div className="space-y-4">
                             <FloatingInput
-                                label={isEditMode ? "Nueva Contraseña (opcional)" : "Contraseña"}
+                                label="Contraseña"
                                 type="password"
                                 showPasswordToggle
                                 isPasswordVisible={showPass}
@@ -269,7 +237,7 @@ export const UserCreateForm = ({
                         onClick={handleCloseReset}
                         className="order-2 sm:order-1 flex items-center gap-2 text-[10px] font-black uppercase text-slate-400 hover:text-red-500 transition-all active:scale-95"
                     >
-                        <X size={16} /> Descartar Cambios
+                        <X size={16} /> Cancelar Registro
                     </button>
 
                     <button
@@ -277,7 +245,7 @@ export const UserCreateForm = ({
                         disabled={isSubmitting}
                         className="order-1 sm:order-2 w-full sm:w-auto bg-[#ff8200] hover:bg-slate-800 text-white px-10 py-4 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all shadow-lg shadow-orange-200 flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50 disabled:grayscale"
                     >
-                        {isSubmitting ? 'Procesando...' : (isEditMode ? 'Guardar Cambios' : 'Confirmar Alta')}
+                        {isSubmitting ? 'Procesando...' : 'Confirmar Alta'}
                         <ShieldCheck size={18} />
                     </button>
                 </div>
