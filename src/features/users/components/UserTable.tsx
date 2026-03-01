@@ -81,7 +81,8 @@ export const UserTable = ({
                                     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-widest
                                         ${u.role === 'ROLE_SUPER_ADMIN' ? 'bg-orange-100 text-orange-600' :
                                             u.role === 'ROLE_ADMIN' ? 'bg-purple-100 text-purple-600' :
-                                                'bg-blue-100 text-blue-600'}`}>
+                                                u.role === 'ROLE_OBSERVER' ? 'bg-teal-100 text-teal-600' :
+                                                    'bg-blue-100 text-blue-600'}`}>
                                         {u.role?.replace('ROLE_', '')}
                                     </span>
                                     <span className="text-[9px] font-bold text-slate-400 flex items-center gap-1">

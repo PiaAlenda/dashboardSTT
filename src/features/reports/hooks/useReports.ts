@@ -6,7 +6,7 @@ import { enrollmentService } from '../../../services/enrollmentService';
 import { masterDataService } from '../../../services/masterDataService';
 import type { Statistics, Enrollment, ChartDataItem } from '../../../types';
 
-export const useReports = (range: string = 'month') => {
+export const useReports = (range: string = 'month', customStart?: string, customEnd?: string) => {
     const statsQuery = useQuery({
         queryKey: ['statistics', range],
         queryFn: statsService.getStatistics,
@@ -44,64 +44,65 @@ export const useReports = (range: string = 'month') => {
     const claims = (claimsQuery.data as any)?.data || claimsQuery.data || [];
     const rejectionReasons = rejectionReasonsQuery.data || [];
 
-    // --- Filter logic for Client-side based on range ---
+    // Helper to check if a date is within the selected range
+    const isDateInRange = (dateStr: string) => {
+        if (!dateStr) return false;
+        const date = new Date(dateStr);
+        const now = new Date();
+        const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+        if (range === 'today') {
+            return date >= startOfToday;
+        }
+
+        if (range === 'yesterday') {
+            const yesterday = new Date(startOfToday);
+            yesterday.setDate(yesterday.getDate() - 1);
+            const endOfYesterday = new Date(startOfToday);
+            return date >= yesterday && date < endOfYesterday;
+        }
+
+        if (range === 'week') {
+            const last7Days = new Date(startOfToday);
+            last7Days.setDate(last7Days.getDate() - 7);
+            return date >= last7Days;
+        }
+
+        if (range === 'month') {
+            const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+            return date >= firstDayOfMonth;
+        }
+
+        if (range === 'last30') {
+            const last30Days = new Date(startOfToday);
+            last30Days.setDate(last30Days.getDate() - 30);
+            return date >= last30Days;
+        }
+
+        if (range === 'all') {
+            return true;
+        }
+
+        if (range === 'custom' && customStart && customEnd) {
+            const start = new Date(customStart);
+            start.setHours(0, 0, 0, 0);
+            const end = new Date(customEnd);
+            end.setHours(23, 59, 59, 999);
+            return date >= start && date <= end;
+        }
+
+        return true; // Default to showing everything if no range matches (backward compatibility)
+    };
+
     const filteredEnrollments = useMemo(() => {
         if (!rawEnrollments.length) return [];
-        const now = new Date();
-        const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
-        return rawEnrollments.filter((e: Enrollment) => {
-            if (!e.createdAt) return false;
-            const date = new Date(e.createdAt);
-
-            if (range === 'today') {
-                return date >= startOfDay;
-            }
-
-            if (range === 'week') {
-                const oneWeekAgo = new Date();
-                oneWeekAgo.setDate(now.getDate() - 7);
-                oneWeekAgo.setHours(0, 0, 0, 0);
-                return date >= oneWeekAgo;
-            }
-
-            if (range === 'month') {
-                const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-                return date >= firstDayOfMonth;
-            }
-
-            return true;
-        });
-    }, [rawEnrollments, range]);
+        return rawEnrollments.filter((e: Enrollment) => isDateInRange(e.createdAt));
+    }, [rawEnrollments, range, customStart, customEnd]);
 
     const filteredClaims = useMemo(() => {
         if (!claims.length) return [];
-        const now = new Date();
-        const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
-        return claims.filter((c: any) => {
-            if (!c.createdAt) return false;
-            const date = new Date(c.createdAt);
-
-            if (range === 'today') {
-                return date >= startOfDay;
-            }
-
-            if (range === 'week') {
-                const oneWeekAgo = new Date();
-                oneWeekAgo.setDate(now.getDate() - 7);
-                oneWeekAgo.setHours(0, 0, 0, 0);
-                return date >= oneWeekAgo;
-            }
-
-            if (range === 'month') {
-                const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-                return date >= firstDayOfMonth;
-            }
-
-            return true;
-        });
-    }, [claims, range]);
+        return claims.filter((c: any) => isDateInRange(c.createdAt));
+    }, [claims, range, customStart, customEnd]);
 
     const STATUS_COLORS: Record<string, string> = {
         'APROBADO': '#22c55e',
@@ -232,7 +233,6 @@ export const useReports = (range: string = 'month') => {
     })).filter(item => item.value > 0) as ChartDataItem[];
 
     const totalEnrollments = useMemo(() => filteredEnrollments.length, [filteredEnrollments]);
-    const approvedCount = useMemo(() => filteredEnrollments.filter((e: Enrollment) => e.status?.toUpperCase() === 'APROBADO').length, [filteredEnrollments]);
 
     // Real data from enrollments for bus lines
     const busLinesChartData = useMemo(() => {
@@ -290,28 +290,39 @@ export const useReports = (range: string = 'month') => {
             .sort((a, b) => b.value - a.value) as ChartDataItem[];
     }, [filteredEnrollments]);
 
-    const statsGrid = useMemo(() => [
-        {
-            label: "Total Inscripciones",
-            value: totalEnrollments.toLocaleString(),
-            color: 'orange' as const
-        },
-        {
-            label: "Tasa de Aprobación",
-            value: totalEnrollments > 0 ? `${Math.round((approvedCount / totalEnrollments) * 100)}%` : '0%',
-            color: 'green' as const
-        },
-        {
-            label: "Reclamos Activos",
-            value: filteredClaims.filter((c: any) => c.status === 'PENDIENTE').length.toString(),
-            color: 'blue' as const
-        },
-        {
-            label: "Reclamos Contestados",
-            value: filteredClaims.filter((c: any) => c.status === 'RESPONDIDO' || c.status === 'CONTESTADO').length.toString(),
-            color: 'emerald' as const
-        },
-    ], [totalEnrollments, approvedCount, filteredClaims]);
+    const statsGrid = useMemo(() => {
+        // Activity-based metrics (regardless of when the record was created)
+        const approvalsInPeriod = rawEnrollments.filter((e: Enrollment) =>
+            e.status?.toUpperCase() === 'APROBADO' && isDateInRange(e.updatedAt || e.createdAt || '')
+        ).length;
+
+        const answersInPeriod = claims.filter((c: any) =>
+            (c.status === 'RESPONDIDO' || c.status === 'CONTESTADO') && isDateInRange(c.answeredAt || '')
+        ).length;
+
+        return [
+            {
+                label: "Total Inscripciones",
+                value: totalEnrollments.toLocaleString(),
+                color: 'orange' as const
+            },
+            {
+                label: "Aprobados",
+                value: approvalsInPeriod.toLocaleString(),
+                color: 'green' as const
+            },
+            {
+                label: "Reclamos Activos",
+                value: filteredClaims.filter((c: any) => c.status === 'PENDIENTE').length.toString(),
+                color: 'blue' as const
+            },
+            {
+                label: "Reclamos Contestados",
+                value: answersInPeriod.toLocaleString(),
+                color: 'emerald' as const
+            },
+        ];
+    }, [rawEnrollments, claims, totalEnrollments, filteredClaims, range, customStart, customEnd]);
 
     return {
         isLoading,

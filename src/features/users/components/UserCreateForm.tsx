@@ -219,6 +219,7 @@ export const UserCreateForm = ({
                                         value={formData.role}
                                         onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                                     >
+                                        <option className="bg-slate-800" value="ROLE_OBSERVER">OBSERVADOR (LEER)</option>
                                         <option className="bg-slate-800" value="ROLE_AUDITOR">AUDITOR</option>
                                         <option className="bg-slate-800" value="ROLE_ADMIN">ADMINISTRADOR</option>
                                         <option className="bg-slate-800" value="ROLE_SUPER_ADMIN">SUPER_ADMIN</option>

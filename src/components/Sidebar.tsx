@@ -22,10 +22,10 @@ export interface NavItem {
 }
 
 export const NAV_ITEMS: NavItem[] = [
-    { label: 'Inscripciones', icon: CreditCard, path: '/4a12b69c3dcb/000c66e873233b66', roles: ['ROLE_SUPER_ADMIN', 'ROLE_ADMIN', 'ROLE_AUDITOR'] },
-    { label: 'Reclamos', icon: MessageSquare, path: '/4a12b69c3dcb/f7e8d9c0b1a2', roles: ['ROLE_SUPER_ADMIN', 'ROLE_ADMIN', 'ROLE_AUDITOR'] },
+    { label: 'Inscripciones', icon: CreditCard, path: '/4a12b69c3dcb/000c66e873233b66', roles: ['ROLE_SUPER_ADMIN', 'ROLE_ADMIN', 'ROLE_AUDITOR', 'ROLE_OBSERVER'] },
+    { label: 'Reclamos', icon: MessageSquare, path: '/4a12b69c3dcb/f7e8d9c0b1a2', roles: ['ROLE_SUPER_ADMIN', 'ROLE_ADMIN', 'ROLE_AUDITOR', 'ROLE_OBSERVER'] },
     { label: 'Usuarios', icon: Users, path: '/4a12b69c3dcb/d3e4f5a6b7c8', roles: ['ROLE_SUPER_ADMIN'] },
-    { label: 'Reportes', icon: BarChart3, path: '/4a12b69c3dcb/a3b2c1d0e9f8', roles: ['ROLE_SUPER_ADMIN', 'ROLE_ADMIN'] },
+    { label: 'Reportes', icon: BarChart3, path: '/4a12b69c3dcb/a3b2c1d0e9f8', roles: ['ROLE_SUPER_ADMIN', 'ROLE_ADMIN', 'ROLE_OBSERVER'] },
     { label: 'Configuración', icon: Settings, path: '/4a12b69c3dcb/c0nfig', roles: ['ROLE_SUPER_ADMIN'], allowedUsernames: ['falenda'] },
 ];
 

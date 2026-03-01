@@ -57,13 +57,13 @@ export const useClaims = () => {
             }
         });
 
-        // Ordenamos los reclamos dentro de cada grupo por fecha descendente
+        // Ordenamos los reclamos dentro de cada grupo por fecha ascendente (mas viejo a mas nuevo)
         Object.values(groups).forEach(group => {
-            group.claims.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+            group.claims.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
         });
 
         return Object.values(groups).sort((a, b) =>
-            new Date(b.lastUpdate).getTime() - new Date(a.lastUpdate).getTime()
+            new Date(a.lastUpdate).getTime() - new Date(b.lastUpdate).getTime()
         );
     }, [claims]);
 

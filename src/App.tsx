@@ -43,7 +43,7 @@ function App() {
             <Route
               path="/4a12b69c3dcb/f7e8d9c0b1a2"
               element={
-                <ProtectedRoute allowedRoles={['ROLE_SUPER_ADMIN', 'ROLE_ADMIN', 'ROLE_AUDITOR']}>
+                <ProtectedRoute allowedRoles={['ROLE_SUPER_ADMIN', 'ROLE_ADMIN', 'ROLE_AUDITOR', 'ROLE_OBSERVER']}>
                   <MainLayout>
                     <ClaimsPage />
                   </MainLayout>
@@ -63,7 +63,7 @@ function App() {
             <Route
               path="/4a12b69c3dcb/a3b2c1d0e9f8"
               element={
-                <ProtectedRoute allowedRoles={['ROLE_SUPER_ADMIN', 'ROLE_ADMIN', 'ROLE_AUDITOR']}>
+                <ProtectedRoute allowedRoles={['ROLE_SUPER_ADMIN', 'ROLE_ADMIN', 'ROLE_AUDITOR', 'ROLE_OBSERVER']}>
                   <MainLayout>
                     <ReportsPage />
                   </MainLayout>

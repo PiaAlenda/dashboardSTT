@@ -1,4 +1,4 @@
-export type Role = 'ROLE_SUPER_ADMIN' | 'ROLE_ADMIN' | 'ROLE_AUDITOR';
+export type Role = 'ROLE_SUPER_ADMIN' | 'ROLE_ADMIN' | 'ROLE_AUDITOR' | 'ROLE_OBSERVER';
 
 export interface User {
     id: number;
@@ -34,6 +34,7 @@ export interface Enrollment {
     beneficiaryType: string;
     educationLevel: string;
     schoolName: string;
+    schoolNameOther?: string;
     deleted: boolean;
     updatedAt?: string;
     dataSource?: number | string | null;

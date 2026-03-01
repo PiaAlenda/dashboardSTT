@@ -139,7 +139,7 @@ export const useEnrollments = () => {
             }
 
             return true;
-        });
+        }).sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
     }, [allEnrollments, searchTerm, filters]);
 
     // Mutaciones

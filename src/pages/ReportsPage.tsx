@@ -13,38 +13,113 @@ import { ChartModal } from '../features/reports/components/ChartModal';
 import { useReports } from '../features/reports/hooks/useReports';
 import { LoadingOverlay } from '../components/ui/LoadingOverlay';
 
-const DateFilter = ({ selected, onChange }: { selected: string; onChange: (val: string) => void }) => {
-    const options = [
-        { id: 'today', label: 'Hoy' },
-        { id: 'week', label: 'Semana' },
-        { id: 'month', label: 'Este Mes' }
+import { ChevronDown, Clock, Check } from 'lucide-react';
+
+const AdvancedDateFilter = ({
+    selected,
+    onChange,
+    customDates,
+    setCustomDates
+}: {
+    selected: string;
+    onChange: (val: string) => void;
+    customDates: { start: string; end: string };
+    setCustomDates: React.Dispatch<React.SetStateAction<{ start: string; end: string }>>;
+}) => {
+    const [isOpen, setIsOpen] = useState(false);
+
+    const presets = [
+        { id: 'today', label: 'Hoy', icon: Clock },
+        { id: 'yesterday', label: 'Ayer', icon: Clock },
+        { id: 'week', label: 'Esta Semana', icon: Calendar },
+        { id: 'month', label: 'Este Mes', icon: Calendar },
+        { id: 'last30', label: 'Últimos 30 días', icon: Calendar },
+        { id: 'custom', label: 'Rango Personalizado', icon: Calendar },
+        { id: 'all', label: 'Todo el Historial', icon: BarChart3 }
     ];
 
+    const currentLabel = presets.find(p => p.id === selected)?.label || 'Filtrar por fecha';
+
     return (
-        <div className="flex items-center gap-1.5 bg-slate-100 p-1.5 rounded-2xl border border-slate-200 shadow-inner">
-            <div className="pl-3 pr-2 text-slate-400">
-                <Calendar size={14} strokeWidth={3} />
+        <div className="relative">
+            <div className="flex flex-col md:flex-row items-end md:items-center gap-4">
+                {/* Selector Dropdown */}
+                <div className="relative min-w-[200px]">
+                    <button
+                        onClick={() => setIsOpen(!isOpen)}
+                        className="w-full flex items-center justify-between gap-3 bg-white px-5 py-3.5 rounded-[1.25rem] border-2 border-slate-100 shadow-sm hover:border-[#ff8200]/30 transition-all font-bold text-slate-700 text-xs uppercase tracking-widest active:scale-[0.98]"
+                    >
+                        <div className="flex items-center gap-3">
+                            <Calendar size={16} className="text-[#ff8200]" />
+                            <span>{currentLabel}</span>
+                        </div>
+                        <ChevronDown size={14} className={`text-slate-400 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {isOpen && (
+                        <>
+                            <div
+                                className="fixed inset-0 z-10"
+                                onClick={() => setIsOpen(false)}
+                            />
+                            <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl border border-slate-100 shadow-xl z-20 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                                <div className="p-2 space-y-1">
+                                    {presets.map((opt) => (
+                                        <button
+                                            key={opt.id}
+                                            onClick={() => {
+                                                onChange(opt.id);
+                                                setIsOpen(false);
+                                            }}
+                                            className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all
+                                                ${selected === opt.id
+                                                    ? 'bg-orange-50 text-[#ff8200]'
+                                                    : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'}`}
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <opt.icon size={14} className={selected === opt.id ? 'text-[#ff8200]' : 'text-slate-400'} />
+                                                <span>{opt.label}</span>
+                                            </div>
+                                            {selected === opt.id && <Check size={12} />}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </>
+                    )}
+                </div>
+
+                {/* Controles de Rango Personalizado (Solo si está seleccionado) */}
+                {selected === 'custom' && (
+                    <div className="flex items-center gap-2 bg-white px-4 py-3 rounded-2xl border-2 border-orange-100 shadow-sm animate-in zoom-in-95 duration-300">
+                        <input
+                            type="date"
+                            className="bg-transparent border-none outline-none text-[10px] font-bold text-slate-600 uppercase tracking-tight cursor-pointer"
+                            value={customDates.start}
+                            onChange={(e) => setCustomDates(prev => ({ ...prev, start: e.target.value }))}
+                        />
+                        <span className="text-slate-300 font-bold px-1">/</span>
+                        <input
+                            type="date"
+                            className="bg-transparent border-none outline-none text-[10px] font-bold text-slate-600 uppercase tracking-tight cursor-pointer"
+                            value={customDates.end}
+                            onChange={(e) => setCustomDates(prev => ({ ...prev, end: e.target.value }))}
+                        />
+                    </div>
+                )}
             </div>
-            {options.map((opt) => (
-                <button
-                    key={opt.id}
-                    onClick={() => onChange(opt.id)}
-                    className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all
-                        ${selected === opt.id
-                            ? 'bg-white text-[#ff8200] shadow-sm'
-                            : 'text-slate-500 hover:text-slate-800'}`}
-                >
-                    {opt.label}
-                </button>
-            ))}
         </div>
     );
 };
 
 export const ReportsPage = () => {
     const [expandedChart, setExpandedChart] = useState<{ title: string; component: React.ReactNode; data: any[] } | null>(null);
-    const [dateRange, setDateRange] = useState('month');
-    const { charts, statsGrid, isLoading } = useReports(dateRange);
+    const [dateRange, setDateRange] = useState('last30');
+    const [customDates, setCustomDates] = useState({
+        start: new Date().toISOString().split('T')[0],
+        end: new Date().toISOString().split('T')[0]
+    });
+    const { charts, statsGrid, isLoading } = useReports(dateRange, customDates.start, customDates.end);
 
     if (isLoading) {
         return <LoadingOverlay message="Generando Reportes Estadísticos..." />;
@@ -78,7 +153,12 @@ export const ReportsPage = () => {
                 </div>
 
                 <div className="shrink-0">
-                    <DateFilter selected={dateRange} onChange={setDateRange} />
+                    <AdvancedDateFilter
+                        selected={dateRange}
+                        onChange={setDateRange}
+                        customDates={customDates}
+                        setCustomDates={setCustomDates}
+                    />
                 </div>
             </header>
 

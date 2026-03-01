@@ -3,6 +3,7 @@ import { useState } from 'react';
 import type { Enrollment } from '../../../types';
 import { EnrollmentFilePreview } from './EnrollmentFilePreview';
 import { enrollmentService } from '../../../services/enrollmentService';
+import { useAuth } from '../../../context/AuthContext';
 
 interface EnrollmentInfoProps {
     enrollment: Enrollment;
@@ -12,6 +13,8 @@ interface EnrollmentInfoProps {
 }
 
 export const EnrollmentInfo = ({ enrollment, onManageStatus, onReject, onDelete }: EnrollmentInfoProps) => {
+    const { user } = useAuth();
+    const isObserver = user?.role === 'ROLE_OBSERVER';
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
     const [isChecking, setIsChecking] = useState(false);
 
@@ -44,26 +47,28 @@ export const EnrollmentInfo = ({ enrollment, onManageStatus, onReject, onDelete 
                     </div>
 
                     {/* BOTONES DE LA IMAGEN */}
-                    <div className="flex items-center gap-2 shrink-0">
-                        <button
-                            onClick={() => onManageStatus?.(enrollment)}
-                            className="w-11 h-11 flex items-center justify-center rounded-2xl bg-orange-50 text-orange-500 hover:bg-orange-100 transition-colors border border-orange-100/50"
-                        >
-                            <Settings2 size={20} />
-                        </button>
-                        <button
-                            onClick={() => onReject?.(enrollment)}
-                            className="w-11 h-11 flex items-center justify-center rounded-2xl bg-red-50 text-red-500 hover:bg-red-100 transition-colors border border-red-100/50"
-                        >
-                            <XCircle size={20} />
-                        </button>
-                        <button
-                            onClick={() => onDelete?.(enrollment.dni)}
-                            className="w-11 h-11 flex items-center justify-center rounded-2xl bg-slate-100 text-slate-400 hover:bg-slate-200 transition-colors border border-white shadow-sm"
-                        >
-                            <AlertCircle size={20} />
-                        </button>
-                    </div>
+                    {!isObserver && (
+                        <div className="flex items-center gap-2 shrink-0">
+                            <button
+                                onClick={() => onManageStatus?.(enrollment)}
+                                className="w-11 h-11 flex items-center justify-center rounded-2xl bg-orange-50 text-orange-500 hover:bg-orange-100 transition-colors border border-orange-100/50"
+                            >
+                                <Settings2 size={20} />
+                            </button>
+                            <button
+                                onClick={() => onReject?.(enrollment)}
+                                className="w-11 h-11 flex items-center justify-center rounded-2xl bg-red-50 text-red-500 hover:bg-red-100 transition-colors border border-red-100/50"
+                            >
+                                <XCircle size={20} />
+                            </button>
+                            <button
+                                onClick={() => onDelete?.(enrollment.dni)}
+                                className="w-11 h-11 flex items-center justify-center rounded-2xl bg-slate-100 text-slate-400 hover:bg-slate-200 transition-colors border border-white shadow-sm"
+                            >
+                                <AlertCircle size={20} />
+                            </button>
+                        </div>
+                    )}
                 </div>
 
                 {/* Detalle de Rechazo */}
@@ -104,7 +109,11 @@ export const EnrollmentInfo = ({ enrollment, onManageStatus, onReject, onDelete 
                     </div>
                     <div className="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm">
                         <p className="text-[9px] font-black uppercase text-slate-400 mb-0.5 tracking-wider">Institución Educativa</p>
-                        <p className="text-xs font-bold text-slate-700 leading-tight">{enrollment.schoolName || 'No especificada'}</p>
+                        <p className="text-xs font-bold text-slate-700 leading-tight">
+                            {enrollment.schoolName?.toLowerCase() === 'otro' || enrollment.schoolName?.toLowerCase() === 'otra'
+                                ? enrollment.schoolNameOther || 'Otro'
+                                : enrollment.schoolName || 'No especificada'}
+                        </p>
                     </div>
                     <div className="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm">
                         <p className="text-[9px] font-black uppercase text-slate-400 mb-0.5 tracking-wider">Nivel de Estudios</p>

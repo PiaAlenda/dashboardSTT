@@ -8,6 +8,7 @@ import { Modal } from '../../../components/ui/Modal';
 import { StatusBadge } from '../../../components/ui/StatusBadge';
 import { ActionButton } from '../../../components/ui/ActionButton';
 import type { Claim } from '../../../types';
+import { useAuth } from '../../../context/AuthContext';
 
 interface ClaimReplyModalProps {
     isOpen: boolean;
@@ -19,6 +20,8 @@ interface ClaimReplyModalProps {
 }
 
 export const ClaimReplyModal = ({ isOpen, onClose, claim, claims = [], onAnswer, isSubmitting }: ClaimReplyModalProps) => {
+    const { user } = useAuth();
+    const isObserver = user?.role === 'ROLE_OBSERVER';
     const [answerText, setAnswerText] = useState('');
     const [selectedClaimId, setSelectedClaimId] = useState<number | null>(null);
     const [mobileView, setMobileView] = useState<'list' | 'chat'>('chat');
@@ -170,7 +173,11 @@ export const ClaimReplyModal = ({ isOpen, onClose, claim, claims = [], onAnswer,
 
                     {/* Input Area */}
                     <div className="p-4 md:p-6 bg-white border-t border-slate-100 shrink-0">
-                        {activeClaim.status === 'PENDIENTE' ? (
+                        {isObserver ? (
+                            <div className="flex items-center justify-center py-4 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Modo Observador - Sólo Lectura</p>
+                            </div>
+                        ) : activeClaim.status === 'PENDIENTE' ? (
                             <div className="space-y-4">
                                 <textarea
                                     className="w-full min-h-[80px] md:min-h-[100px] p-4 md:p-5 bg-slate-50 border-2 border-slate-100 rounded-[20px] text-slate-900 text-sm outline-none focus:border-orange-500 transition-all resize-none shadow-inner"
