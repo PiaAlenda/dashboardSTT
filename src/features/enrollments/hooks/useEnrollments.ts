@@ -16,7 +16,7 @@ export const useEnrollments = () => {
     const [activeTab, setActiveTab] = useState('info');
 
     // Estado para exportación CSV
-    const [exportDates, setExportDates] = useState({ start: '', end: '' });
+    const [isExportModalOpen, setIsExportModalOpen] = useState(false);
     const [isExporting, setIsExporting] = useState(false);
 
     // Estado de Filtros
@@ -163,24 +163,37 @@ export const useEnrollments = () => {
         }
     });
 
-    const exportCsv = async () => {
+    const exportCsvByLevel = async (level: string, startDate: string, endDate: string) => {
         try {
-            if (!exportDates.start || !exportDates.end) {
-                alert("Por favor seleccione un rango de fechas");
-                return;
-            }
             setIsExporting(true);
-            const activeFilter = Object.keys(filters).find(key => filters[key as keyof typeof filters]) || 'EN_PROCESO';
-            const blob = await enrollmentService.exportCsv(exportDates.start, exportDates.end, activeFilter);
+            const blob = await enrollmentService.exportLevelCsv(level, startDate, endDate);
             const url = window.URL.createObjectURL(new Blob([blob]));
             const link = document.createElement('a');
             link.href = url;
-            link.setAttribute('download', `inscripciones_${activeFilter}_${exportDates.start}_${exportDates.end}.csv`);
+            link.setAttribute('download', `inscripciones_${level}_${startDate}_${endDate}.csv`);
             document.body.appendChild(link);
             link.click();
             link.remove();
-        } catch (error) {
+            setIsExportModalOpen(false);
+        } catch (error: any) {
             console.error("Error exportando CSV", error);
+            const status = error.response?.status;
+            const url = error.config?.url;
+            let errorMsg = '';
+
+            if (error.response?.data instanceof Blob) {
+                const text = await error.response.data.text();
+                try {
+                    const json = JSON.parse(text);
+                    errorMsg = json.message || 'Error del servidor';
+                } catch {
+                    errorMsg = text || 'Error al descargar el archivo.';
+                }
+            } else {
+                errorMsg = error.response?.data?.message || error.message || 'Error desconocido';
+            }
+
+            alert(`Fallo en [${status}] para ${url}\nDetalle: ${errorMsg}\nRevisa la consola para más información.`);
         } finally {
             setIsExporting(false);
         }
@@ -242,9 +255,9 @@ export const useEnrollments = () => {
         setDniToDelete,
         statusMutation,
         deleteMutation,
-        exportCsv,
-        exportDates,
-        setExportDates,
+        exportCsvByLevel,
+        isExportModalOpen,
+        setIsExportModalOpen,
         isExporting
     };
 };

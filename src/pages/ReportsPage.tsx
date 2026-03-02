@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { BarChart3, Calendar } from 'lucide-react';
 import { AnalyticsCard } from '../features/reports/components/AnalyticsCard';
 import { StatusChart } from '../features/reports/components/StatusChart';
@@ -7,8 +7,9 @@ import { ShiftChart } from '../features/reports/components/ShiftChart';
 import { LevelChart } from '../features/reports/components/LevelChart';
 import { SourceChart } from '../features/reports/components/SourceChart';
 import { RejectionChart } from '../features/reports/components/RejectionChart';
-//import { LinesChart } from '../features/reports/components/LinesChart';
+import { LinesChart } from '../features/reports/components/LinesChart';
 import { CompanyChart } from '../features/reports/components/CompanyChart';
+import { HistogramChart } from '../features/reports/components/HistogramChart';
 import { ChartModal } from '../features/reports/components/ChartModal';
 import { useReports } from '../features/reports/hooks/useReports';
 import { LoadingOverlay } from '../components/ui/LoadingOverlay';
@@ -112,6 +113,48 @@ const AdvancedDateFilter = ({
     );
 };
 
+const WeekSelector = ({ dailyData, selectedWeekKey, onSelectWeek }: { dailyData: any[], selectedWeekKey: string | null, onSelectWeek: (val: string | null) => void }) => {
+    const weeksMap = useMemo(() => {
+        const map = new Map<string, string>();
+        dailyData.forEach((d: any) => {
+            const date = d.fullDate;
+            if (!date) return;
+            const day = date.getDay();
+            const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+            const monday = new Date(date);
+            monday.setDate(diff);
+
+            const sunday = new Date(monday);
+            sunday.setDate(monday.getDate() + 6);
+
+            const key = `${monday.toISOString().split('T')[0]}_${sunday.toISOString().split('T')[0]}`;
+
+            const fM = `${String(monday.getDate()).padStart(2, '0')}/${String(monday.getMonth() + 1).padStart(2, '0')}`;
+            const fS = `${String(sunday.getDate()).padStart(2, '0')}/${String(sunday.getMonth() + 1).padStart(2, '0')}`;
+
+            if (!map.has(key)) {
+                map.set(key, `S. del ${fM} al ${fS}`);
+            }
+        });
+        return Array.from(map.entries());
+    }, [dailyData]);
+
+    if (weeksMap.length === 0) return null;
+
+    return (
+        <select
+            className="text-[10px] uppercase font-bold text-slate-500 bg-white border border-slate-200 rounded-xl px-3 py-1.5 outline-none cursor-pointer hover:border-slate-300 transition-colors shadow-sm"
+            value={selectedWeekKey || 'all'}
+            onChange={(e) => onSelectWeek(e.target.value === 'all' ? null : e.target.value)}
+        >
+            <option value="all">Todas las Semanas</option>
+            {weeksMap.map(([key, label]) => (
+                <option key={key} value={key}>{label}</option>
+            ))}
+        </select>
+    );
+};
+
 export const ReportsPage = () => {
     const [expandedChart, setExpandedChart] = useState<{ title: string; component: React.ReactNode; data: any[] } | null>(null);
     const [dateRange, setDateRange] = useState('last30');
@@ -119,7 +162,21 @@ export const ReportsPage = () => {
         start: new Date().toISOString().split('T')[0],
         end: new Date().toISOString().split('T')[0]
     });
+    const [selectedWeek, setSelectedWeek] = useState<string | null>(null);
     const { charts, statsGrid, isLoading } = useReports(dateRange, customDates.start, customDates.end);
+
+    const filteredEnrollmentsHistogram = useMemo(() => {
+        if (!selectedWeek) return charts.dailyEnrollments;
+        const [startStr, endStr] = selectedWeek.split('_');
+        const start = new Date(startStr);
+        start.setHours(0, 0, 0, 0);
+        const end = new Date(endStr);
+        end.setHours(23, 59, 59, 999);
+
+        return charts.dailyEnrollments.filter((d: any) => {
+            return d.fullDate >= start && d.fullDate <= end;
+        });
+    }, [charts.dailyEnrollments, selectedWeek]);
 
     if (isLoading) {
         return <LoadingOverlay message="Generando Reportes Estadísticos..." />;
@@ -269,17 +326,17 @@ export const ReportsPage = () => {
                     {(type) => <RejectionChart type={type} data={charts.rejection} />}
                 </AnalyticsCard>
 
-                {/*<AnalyticsCard
+                <AnalyticsCard
                     title="Líneas de Colectivo"
-                    subtitle="Impacto por línea de transporte (130 líneas)"
+                    subtitle="Impacto por línea de transporte (Top 10)"
                     onExpand={() => setExpandedChart({
                         title: "Líneas de Colectivo",
-                        component: <LinesChart type="bar" data={charts.busLines} />,
+                        component: <LinesChart type="pie" data={charts.busLines} />,
                         data: charts.busLines
                     })}
                 >
                     {(type) => <LinesChart type={type} data={charts.busLines} />}
-                </AnalyticsCard> */}
+                </AnalyticsCard>
 
                 <AnalyticsCard
                     title="Empresas de Colectivo"
@@ -292,6 +349,24 @@ export const ReportsPage = () => {
                 >
                     {(type) => <CompanyChart type={type} data={charts.busCompanies} />}
                 </AnalyticsCard>
+            </section>
+
+            {/* HISTOGRAMAS */}
+            <section className="flex flex-col gap-8 px-2 mt-8">
+                <AnalyticsCard
+                    title="Inscripciones por Día"
+                    subtitle="Frecuencia diaria de solicitudes"
+                    hideTypeToggle
+                    headerAction={<WeekSelector dailyData={charts.dailyEnrollments} selectedWeekKey={selectedWeek} onSelectWeek={setSelectedWeek} />}
+                    onExpand={() => setExpandedChart({
+                        title: "Inscripciones por Día",
+                        component: <HistogramChart data={filteredEnrollmentsHistogram} color="#ff8200" />,
+                        data: filteredEnrollmentsHistogram
+                    })}
+                >
+                    {() => <HistogramChart data={filteredEnrollmentsHistogram} color="#ff8200" />}
+                </AnalyticsCard>
+
             </section>
         </div>
     );

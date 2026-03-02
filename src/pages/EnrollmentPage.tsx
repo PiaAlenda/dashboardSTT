@@ -8,6 +8,7 @@ import { EnrollmentFilters } from '../features/enrollments/components/Enrollment
 import { EnrollmentToolbar } from '../features/enrollments/components/EnrollmentToolbar';
 import { EnrollmentModals } from '../features/enrollments/components/EnrollmentModals';
 import { HelpModal } from '../features/enrollments/components/HelpModal';
+import { ExportCsvModal } from '../features/enrollments/components/ExportCsvModal';
 import { Pagination } from '../components/ui/Pagination';
 
 export const EnrollmentPage = () => {
@@ -23,7 +24,7 @@ export const EnrollmentPage = () => {
         confirmAction, setConfirmAction,
         dniToDelete, setDniToDelete,
         statusMutation, deleteMutation,
-        exportCsv, exportDates, setExportDates, isExporting
+        exportCsvByLevel, isExportModalOpen, setIsExportModalOpen, isExporting
     } = useEnrollments();
 
     const [currentPage, setCurrentPage] = useState(1);
@@ -78,10 +79,8 @@ export const EnrollmentPage = () => {
                     setSearchTerm={setSearchTerm}
                     showExport={user?.role === 'ROLE_SUPER_ADMIN'}
                     exportProps={{
-                        onExport: exportCsv,
-                        loading: isExporting,
-                        dates: exportDates,
-                        setDates: setExportDates
+                        onOpenExportModal: () => setIsExportModalOpen(true),
+                        loading: isExporting
                     }}
                 />
 
@@ -130,6 +129,13 @@ export const EnrollmentPage = () => {
                     setSelectedEnrollment, setActiveTab, setStatusSelector,
                     setConfirmAction, setDniToDelete, statusMutation, deleteMutation
                 }}
+            />
+
+            <ExportCsvModal
+                isOpen={isExportModalOpen}
+                onClose={() => setIsExportModalOpen(false)}
+                onExport={exportCsvByLevel}
+                isExporting={isExporting}
             />
         </div>
     );

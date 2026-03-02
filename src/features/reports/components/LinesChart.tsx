@@ -1,10 +1,9 @@
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import {
-    Treemap, ResponsiveContainer, Tooltip,
+    PieChart, Pie, ResponsiveContainer, Tooltip,
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Cell
 } from 'recharts';
 import { ChartLegend } from './ChartLegend';
-import { LayoutGrid, List } from 'lucide-react';
 
 interface LinesChartProps {
     type: 'pie' | 'bar';
@@ -12,53 +11,39 @@ interface LinesChartProps {
 }
 
 export const LinesChart = ({ type, data }: LinesChartProps) => {
-    const [showOnlyTop, setShowOnlyTop] = useState(false);
-
     const chartData = useMemo(() => {
         let processed = data.map(d => ({ ...d, color: d.color || '#3b82f6' }));
-        if (showOnlyTop) {
-            processed = processed.slice(0, 10);
-        }
-        return processed;
-    }, [data, showOnlyTop]);
+        return processed.slice(0, 10);
+    }, [data]);
 
     const isTreemap = type === 'pie';
 
     return (
         <div className="w-full flex flex-col gap-4">
-            <div className="flex items-center justify-between px-2">
-                <div className="flex items-center gap-2">
-                    <button
-                        onClick={() => setShowOnlyTop(!showOnlyTop)}
-                        className={`text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg border transition-all
-                            ${showOnlyTop
-                                ? 'bg-[#ff8200] text-white border-orange-500'
-                                : 'bg-white text-slate-400 border-slate-100 hover:border-slate-300'}`}
-                    >
-                        {showOnlyTop ? 'Ver Todas' : 'Ver Top 10'}
-                    </button>
-                </div>
-                <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg">
-                    <div className="p-1.5 text-slate-400" title={isTreemap ? "Vista Treemap" : "Vista Lista"}>
-                        {isTreemap ? <LayoutGrid size={12} /> : <List size={12} />}
-                    </div>
-                </div>
-            </div>
-
             <div className={`${!isTreemap ? 'overflow-y-auto max-h-[300px] pr-2 custom-scrollbar' : ''}`}>
                 <ResponsiveContainer width="100%" height={isTreemap ? 240 : Math.max(240, chartData.length * 25)}>
                     {isTreemap ? (
-                        <Treemap
-                            data={chartData}
-                            dataKey="value"
-                            aspectRatio={4 / 3}
-                            stroke="#fff"
-                            animationDuration={1000}
-                        >
+                        <PieChart>
+                            <Pie
+                                data={chartData}
+                                cx="50%"
+                                cy="50%"
+                                innerRadius={60}
+                                outerRadius={80}
+                                paddingAngle={5}
+                                dataKey="value"
+                                animationDuration={1000}
+                            >
+                                {chartData.map((item, index) => (
+                                    <Cell key={`cell-${index}`} fill={item.color} stroke="none" />
+                                ))}
+                            </Pie>
                             <Tooltip
+                                contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                                itemStyle={{ fontWeight: '900', fontSize: '12px' }}
                                 content={<CustomTooltip />}
                             />
-                        </Treemap>
+                        </PieChart>
                     ) : (
                         <BarChart
                             layout="vertical"
@@ -88,7 +73,7 @@ export const LinesChart = ({ type, data }: LinesChartProps) => {
                     )}
                 </ResponsiveContainer>
             </div>
-            {showOnlyTop && <ChartLegend data={chartData} />}
+            <ChartLegend data={chartData} />
         </div>
     );
 };

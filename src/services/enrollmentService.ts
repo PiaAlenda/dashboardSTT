@@ -48,6 +48,14 @@ export const enrollmentService = {
         }).then(res => res.data);
     },
 
+    exportLevelCsv: (level: string, startDate: string, endDate: string) => {
+        return api.get(`admin/exports/${level}`, {
+            params: { startDate, endDate },
+            responseType: 'blob'
+        }).then(res => res.data);
+    },
+
+    // Retaining old method just in case or if still needed elsewhere
     exportCsv: (startDate: string, endDate: string, status: string) => {
         return api.get('admin/enrollments/export/csv/filtered', {
             params: { startDate, endDate, status },

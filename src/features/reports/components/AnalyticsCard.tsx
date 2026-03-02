@@ -6,9 +6,11 @@ interface AnalyticsCardProps {
     subtitle?: string;
     children: (type: 'pie' | 'bar') => React.ReactNode;
     onExpand?: () => void;
+    hideTypeToggle?: boolean;
+    headerAction?: React.ReactNode;
 }
 
-export const AnalyticsCard = ({ title, subtitle, children, onExpand }: AnalyticsCardProps) => {
+export const AnalyticsCard = ({ title, subtitle, children, onExpand, hideTypeToggle, headerAction }: AnalyticsCardProps) => {
     const [chartType, setChartType] = useState<'pie' | 'bar'>('pie');
 
     return (
@@ -20,22 +22,26 @@ export const AnalyticsCard = ({ title, subtitle, children, onExpand }: Analytics
                 </div>
 
                 <div className="flex items-center gap-2">
-                    <div className="flex items-center p-1 bg-slate-50 rounded-xl border border-slate-100 shadow-inner">
-                        <button
-                            onClick={() => setChartType('pie')}
-                            className={`p-1.5 rounded-lg transition-all ${chartType === 'pie' ? 'bg-white text-[#ff8200] shadow-md' : 'text-slate-400 hover:text-slate-600'}`}
-                            title="Ver en Torta"
-                        >
-                            <PieIcon size={14} />
-                        </button>
-                        <button
-                            onClick={() => setChartType('bar')}
-                            className={`p-1.5 rounded-lg transition-all ${chartType === 'bar' ? 'bg-white text-[#ff8200] shadow-md' : 'text-slate-400 hover:text-slate-600'}`}
-                            title="Ver en Barras"
-                        >
-                            <BarIcon size={14} />
-                        </button>
-                    </div>
+                    {headerAction}
+
+                    {!hideTypeToggle && (
+                        <div className="flex items-center p-1 bg-slate-50 rounded-xl border border-slate-100 shadow-inner">
+                            <button
+                                onClick={() => setChartType('pie')}
+                                className={`p-1.5 rounded-lg transition-all ${chartType === 'pie' ? 'bg-white text-[#ff8200] shadow-md' : 'text-slate-400 hover:text-slate-600'}`}
+                                title="Ver en Torta"
+                            >
+                                <PieIcon size={14} />
+                            </button>
+                            <button
+                                onClick={() => setChartType('bar')}
+                                className={`p-1.5 rounded-lg transition-all ${chartType === 'bar' ? 'bg-white text-[#ff8200] shadow-md' : 'text-slate-400 hover:text-slate-600'}`}
+                                title="Ver en Barras"
+                            >
+                                <BarIcon size={14} />
+                            </button>
+                        </div>
+                    )}
 
                     <button
                         onClick={onExpand}

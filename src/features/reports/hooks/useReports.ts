@@ -290,6 +290,66 @@ export const useReports = (range: string = 'month', customStart?: string, custom
             .sort((a, b) => b.value - a.value) as ChartDataItem[];
     }, [filteredEnrollments]);
 
+    // Daily Stats for Histogram (Inscripciones por Día)
+    const dailyEnrollmentsData = useMemo(() => {
+        const counts: Record<string, { count: number, dateObj: Date }> = {};
+
+        filteredEnrollments.forEach((e: Enrollment) => {
+            if (!e.createdAt) return;
+            const dateObj = new Date(e.createdAt);
+            // Formatear a DD/MM
+            const day = String(dateObj.getDate()).padStart(2, '0');
+            const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const key = `${day}/${month}`;
+
+            if (!counts[key]) counts[key] = { count: 0, dateObj };
+            counts[key].count += 1;
+        });
+
+        return Object.entries(counts)
+            .map(([name, data]) => ({
+                name,
+                value: data.count,
+                color: '#ff8200',
+                fullDate: data.dateObj
+            })).sort((a, b) => a.fullDate.getTime() - b.fullDate.getTime()) as (ChartDataItem & { fullDate: Date })[];
+    }, [filteredEnrollments]);
+
+    // Daily Stats for Histogram (Líneas Registradas por Día)
+    const dailyLinesData = useMemo(() => {
+        const counts: Record<string, { count: number, dateObj: Date }> = {};
+
+        filteredEnrollments.forEach((e: any) => {
+            if (!e.createdAt) return;
+            const dateObj = new Date(e.createdAt);
+            const day = String(dateObj.getDate()).padStart(2, '0');
+            const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const key = `${day}/${month}`;
+
+            // Contamos cuántas líneas declaró este usuario
+            let linesSum = 0;
+            for (let i = 1; i <= 10; i++) {
+                const lineName = e[`busLine${i}Name`];
+                if (lineName && typeof lineName === 'string' && lineName.trim() !== '') {
+                    linesSum++;
+                }
+            }
+
+            if (linesSum > 0) {
+                if (!counts[key]) counts[key] = { count: 0, dateObj };
+                counts[key].count += linesSum;
+            }
+        });
+
+        return Object.entries(counts)
+            .map(([name, data]) => ({
+                name,
+                value: data.count,
+                color: '#3b82f6',
+                fullDate: data.dateObj
+            })).sort((a, b) => a.fullDate.getTime() - b.fullDate.getTime()) as (ChartDataItem & { fullDate: Date })[];
+    }, [filteredEnrollments]);
+
     const statsGrid = useMemo(() => {
         // Activity-based metrics (regardless of when the record was created)
         const approvalsInPeriod = rawEnrollments.filter((e: Enrollment) =>
@@ -334,7 +394,9 @@ export const useReports = (range: string = 'month', customStart?: string, custom
             source: sourceChartData,
             rejection: rejectionChartData,
             busLines: busLinesChartData,
-            busCompanies: busCompaniesChartData
+            busCompanies: busCompaniesChartData,
+            dailyEnrollments: dailyEnrollmentsData,
+            dailyLines: dailyLinesData
         },
         statsGrid
     };
