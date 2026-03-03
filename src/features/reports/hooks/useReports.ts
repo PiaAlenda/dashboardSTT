@@ -360,6 +360,10 @@ export const useReports = (range: string = 'month', customStart?: string, custom
             (c.status === 'RESPONDIDO' || c.status === 'CONTESTADO') && isDateInRange(c.answeredAt || '')
         ).length;
 
+        const approvalPercentage = totalEnrollments > 0
+            ? Math.round((approvalsInPeriod / totalEnrollments) * 100)
+            : 0;
+
         return [
             {
                 label: "Total Inscripciones",
@@ -369,6 +373,11 @@ export const useReports = (range: string = 'month', customStart?: string, custom
             {
                 label: "Aprobados",
                 value: approvalsInPeriod.toLocaleString(),
+                color: 'green' as const
+            },
+            {
+                label: "% Aprobados",
+                value: `${approvalPercentage}%`,
                 color: 'green' as const
             },
             {
