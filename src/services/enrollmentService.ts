@@ -54,12 +54,14 @@ export const enrollmentService = {
             responseType: 'blob'
         }).then(res => res.data);
     },
-
-    // Retaining old method just in case or if still needed elsewhere
+    
     exportCsv: (startDate: string, endDate: string, status: string) => {
         return api.get('admin/enrollments/export/csv/filtered', {
             params: { startDate, endDate, status },
             responseType: 'blob'
         }).then(res => res.data);
-    }
+    },
+
+    crossCheck: () =>
+        api.post('admin/enrollments/cross-check').then(res => res.data)
 };
