@@ -50,33 +50,35 @@ export const useReports = (range: string = 'month', customStart?: string, custom
         const date = new Date(dateStr);
         const now = new Date();
         const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const endOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
 
         if (range === 'today') {
-            return date >= startOfToday;
+            return date >= startOfToday && date <= endOfToday;
         }
 
         if (range === 'yesterday') {
             const yesterday = new Date(startOfToday);
             yesterday.setDate(yesterday.getDate() - 1);
             const endOfYesterday = new Date(startOfToday);
-            return date >= yesterday && date < endOfYesterday;
+            endOfYesterday.setMilliseconds(-1);
+            return date >= yesterday && date <= endOfYesterday;
         }
 
         if (range === 'week') {
             const last7Days = new Date(startOfToday);
             last7Days.setDate(last7Days.getDate() - 7);
-            return date >= last7Days;
+            return date >= last7Days && date <= endOfToday;
         }
 
         if (range === 'month') {
             const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-            return date >= firstDayOfMonth;
+            return date >= firstDayOfMonth && date <= endOfToday;
         }
 
         if (range === 'last30') {
             const last30Days = new Date(startOfToday);
             last30Days.setDate(last30Days.getDate() - 30);
-            return date >= last30Days;
+            return date >= last30Days && date <= endOfToday;
         }
 
         if (range === 'all') {
@@ -84,14 +86,15 @@ export const useReports = (range: string = 'month', customStart?: string, custom
         }
 
         if (range === 'custom' && customStart && customEnd) {
-            const start = new Date(customStart);
-            start.setHours(0, 0, 0, 0);
-            const end = new Date(customEnd);
-            end.setHours(23, 59, 59, 999);
-            return date >= start && date <= end;
+            // Comparar solo la fecha (YYYY-MM-DD) en hora local
+            const localYear = date.getFullYear();
+            const localMonth = String(date.getMonth() + 1).padStart(2, '0');
+            const localDay = String(date.getDate()).padStart(2, '0');
+            const dateStrLocal = `${localYear}-${localMonth}-${localDay}`;
+            return dateStrLocal >= customStart && dateStrLocal <= customEnd;
         }
 
-        return true; // Default to showing everything if no range matches (backward compatibility)
+        return true;
     };
 
     const filteredEnrollments = useMemo(() => {
@@ -292,23 +295,32 @@ export const useReports = (range: string = 'month', customStart?: string, custom
 
     // Daily Stats for Histogram (Inscripciones por Día)
     const dailyEnrollmentsData = useMemo(() => {
-        const counts: Record<string, { count: number, dateObj: Date }> = {};
+        const counts: Record<string, { count: number, dateObj: Date, label: string }> = {};
 
         filteredEnrollments.forEach((e: Enrollment) => {
             if (!e.createdAt) return;
             const dateObj = new Date(e.createdAt);
-            // Formatear a DD/MM
+
+            // Usar fecha completa como key para evitar colisiones entre años
             const day = String(dateObj.getDate()).padStart(2, '0');
             const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-            const key = `${day}/${month}`;
+            const year = dateObj.getFullYear();
+            const key = `${year}-${month}-${day}`;
+            const displayLabel = `${day}/${month}`;
 
-            if (!counts[key]) counts[key] = { count: 0, dateObj };
+            if (!counts[key]) {
+                counts[key] = {
+                    count: 0,
+                    dateObj: new Date(year, dateObj.getMonth(), dateObj.getDate()),
+                    label: displayLabel
+                };
+            }
             counts[key].count += 1;
         });
 
         return Object.entries(counts)
-            .map(([name, data]) => ({
-                name,
+            .map(([_, data]) => ({
+                name: data.label,
                 value: data.count,
                 color: '#ff8200',
                 fullDate: data.dateObj
@@ -317,14 +329,16 @@ export const useReports = (range: string = 'month', customStart?: string, custom
 
     // Daily Stats for Histogram (Líneas Registradas por Día)
     const dailyLinesData = useMemo(() => {
-        const counts: Record<string, { count: number, dateObj: Date }> = {};
+        const counts: Record<string, { count: number, dateObj: Date, label: string }> = {};
 
         filteredEnrollments.forEach((e: any) => {
             if (!e.createdAt) return;
             const dateObj = new Date(e.createdAt);
             const day = String(dateObj.getDate()).padStart(2, '0');
             const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-            const key = `${day}/${month}`;
+            const year = dateObj.getFullYear();
+            const key = `${year}-${month}-${day}`;
+            const displayLabel = `${day}/${month}`;
 
             // Contamos cuántas líneas declaró este usuario
             let linesSum = 0;
@@ -336,14 +350,20 @@ export const useReports = (range: string = 'month', customStart?: string, custom
             }
 
             if (linesSum > 0) {
-                if (!counts[key]) counts[key] = { count: 0, dateObj };
+                if (!counts[key]) {
+                    counts[key] = {
+                        count: 0,
+                        dateObj: new Date(year, dateObj.getMonth(), dateObj.getDate()),
+                        label: displayLabel
+                    };
+                }
                 counts[key].count += linesSum;
             }
         });
 
         return Object.entries(counts)
-            .map(([name, data]) => ({
-                name,
+            .map(([_, data]) => ({
+                name: data.label,
                 value: data.count,
                 color: '#3b82f6',
                 fullDate: data.dateObj

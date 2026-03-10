@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { BarChart3, Calendar } from 'lucide-react';
 import { AnalyticsCard } from '../features/reports/components/AnalyticsCard';
 import { StatusChart } from '../features/reports/components/StatusChart';
@@ -164,6 +164,11 @@ export const ReportsPage = () => {
     });
     const [selectedWeek, setSelectedWeek] = useState<string | null>(null);
     const { charts, statsGrid, isLoading } = useReports(dateRange, customDates.start, customDates.end);
+
+    // Reset selected week filter when the main date range changes
+    useEffect(() => {
+        setSelectedWeek(null);
+    }, [dateRange, customDates.start, customDates.end]);
 
     const filteredEnrollmentsHistogram = useMemo(() => {
         if (!selectedWeek) return charts.dailyEnrollments;
