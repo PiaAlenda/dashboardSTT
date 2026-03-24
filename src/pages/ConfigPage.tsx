@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Settings, Database, ArrowRight, Zap } from 'lucide-react';
+import { Settings, Database, ArrowRight, Zap, AlertCircle, Activity } from 'lucide-react';
 import { configService, type SiteStatus } from '../services/configService';
 import { LoadingOverlay } from '../components/ui/LoadingOverlay';
-import { CrossCheckModal } from '../features/enrollments/components/CrossCheckModal';
+import { CrossCheckModal, type CrossCheckType } from '../features/enrollments/components/CrossCheckModal';
 import { ConfigServiceCard } from '../features/config/components/ConfigServiceCard';
 
 export const ConfigPage: React.FC = () => {
@@ -10,6 +10,12 @@ export const ConfigPage: React.FC = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [isUpdating, setIsUpdating] = useState<string | null>(null);
     const [isCrossCheckOpen, setIsCrossCheckOpen] = useState(false);
+    const [crossCheckType, setCrossCheckType] = useState<CrossCheckType>('default');
+
+    const openCrossCheck = (type: CrossCheckType) => {
+        setCrossCheckType(type);
+        setIsCrossCheckOpen(true);
+    };
 
     useEffect(() => {
         let isMounted = true;
@@ -89,7 +95,7 @@ export const ConfigPage: React.FC = () => {
                 </div>
 
                 <div
-                    onClick={() => setIsCrossCheckOpen(true)}
+                    onClick={() => openCrossCheck('default')}
                     className="group relative bg-white rounded-[1.5rem] border border-slate-100 
                                p-6 sm:p-10 shadow-sm hover:shadow-xl hover:border-orange-100 
                                transition-all duration-500 cursor-pointer overflow-hidden 
@@ -133,9 +139,54 @@ export const ConfigPage: React.FC = () => {
                         <Database size={200} strokeWidth={1} />
                     </div>
                 </div>
+
+                {/* Sub Options Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto mt-6">
+                    {/* Botón Rechazados */}
+                    <button
+                        onClick={() => openCrossCheck('rejected')}
+                        className="group flex flex-col items-center justify-center gap-3 bg-white border border-slate-100 p-6 rounded-[1.5rem] hover:shadow-xl hover:border-red-100 transition-all duration-300 active:scale-95"
+                    >
+                        <div className="p-4 bg-red-50 text-red-500 rounded-2xl group-hover:bg-red-500 group-hover:text-white transition-colors">
+                            <AlertCircle size={28} />
+                        </div>
+                        <div className="text-center">
+                            <h4 className="text-sm font-black text-slate-800 uppercase tracking-tight">Cruce: Rechazados</h4>
+                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Solo registros rechazados</p>
+                        </div>
+                    </button>
+
+                    {/* Botón Procesar Todos */}
+                    <button
+                        onClick={() => openCrossCheck('all')}
+                        className="group flex flex-col items-center justify-center gap-3 bg-white border border-slate-100 p-6 rounded-[1.5rem] hover:shadow-xl hover:border-blue-100 transition-all duration-300 active:scale-95"
+                    >
+                        <div className="p-4 bg-blue-50 text-blue-500 rounded-2xl group-hover:bg-blue-500 group-hover:text-white transition-colors">
+                            <Database size={28} />
+                        </div>
+                        <div className="text-center">
+                            <h4 className="text-sm font-black text-slate-800 uppercase tracking-tight">Cruce: Procesar Todos</h4>
+                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Ignorar estado actual</p>
+                        </div>
+                    </button>
+
+                    {/* Botón Pendientes */}
+                    <button
+                        onClick={() => openCrossCheck('pending')}
+                        className="group flex flex-col items-center justify-center gap-3 bg-white border border-slate-100 p-6 rounded-[1.5rem] hover:shadow-xl hover:border-emerald-100 transition-all duration-300 active:scale-95"
+                    >
+                        <div className="p-4 bg-emerald-50 text-emerald-500 rounded-2xl group-hover:bg-emerald-500 group-hover:text-white transition-colors">
+                            <Activity size={28} />
+                        </div>
+                        <div className="text-center">
+                            <h4 className="text-sm font-black text-slate-800 uppercase tracking-tight">Cruce: Pendientes</h4>
+                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Solo pendientes de revisión</p>
+                        </div>
+                    </button>
+                </div>
             </section>
 
-            <CrossCheckModal isOpen={isCrossCheckOpen} onClose={() => setIsCrossCheckOpen(false)} />
+            <CrossCheckModal isOpen={isCrossCheckOpen} onClose={() => setIsCrossCheckOpen(false)} type={crossCheckType} />
         </div>
     );
 };

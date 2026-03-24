@@ -3,12 +3,15 @@ import { Play, CheckCircle2, AlertCircle, Activity, Repeat } from 'lucide-react'
 import { enrollmentService } from '../../../services/enrollmentService';
 import { Modal } from '../../../components/ui/Modal';
 
+export type CrossCheckType = 'default' | 'rejected' | 'all' | 'pending';
+
 interface CrossCheckModalProps {
     isOpen: boolean;
     onClose: () => void;
+    type?: CrossCheckType;
 }
 
-export const CrossCheckModal: React.FC<CrossCheckModalProps> = ({ isOpen, onClose }) => {
+export const CrossCheckModal: React.FC<CrossCheckModalProps> = ({ isOpen, onClose, type = 'default' }) => {
     const [status, setStatus] = useState<'idle' | 'processing' | 'success' | 'error'>('idle');
     const [result, setResult] = useState<any>(null);
     const [error, setError] = useState<string | null>(null);
@@ -18,7 +21,22 @@ export const CrossCheckModal: React.FC<CrossCheckModalProps> = ({ isOpen, onClos
         setError(null);
 
         try {
-            const data = await enrollmentService.crossCheck();
+            let data;
+            switch (type) {
+                case 'rejected':
+                    data = await enrollmentService.crossCheckRejected();
+                    break;
+                case 'all':
+                    data = await enrollmentService.crossCheckProcessAll();
+                    break;
+                case 'pending':
+                    data = await enrollmentService.crossCheckPending();
+                    break;
+                case 'default':
+                default:
+                    data = await enrollmentService.crossCheck();
+                    break;
+            }
             setResult(data);
             setStatus('success');
         } catch (err: any) {
@@ -39,18 +57,51 @@ export const CrossCheckModal: React.FC<CrossCheckModalProps> = ({ isOpen, onClos
         }
     };
 
+    const getTypeConfig = () => {
+        switch (type) {
+            case 'rejected':
+                return {
+                    title: 'Cruce: Solo Rechazados',
+                    description: 'Se re-evaluarán únicamente las inscripciones en estado RECHAZADO contra los padrones actuales.',
+                    icon: AlertCircle
+                };
+            case 'all':
+                return {
+                    title: 'Cruce: Procesar Todos',
+                    description: 'Se forzará el cruce completo de todos los registros en la base de datos, independientemente de su estado.',
+                    icon: Activity
+                };
+            case 'pending':
+                return {
+                    title: 'Cruce: Solo Pendientes',
+                    description: 'Se evaluarán únicamente las inscripciones en estado PENDIENTE de revisión.',
+                    icon: Activity
+                };
+            case 'default':
+            default:
+                return {
+                    title: 'Cruce de Inscripciones',
+                    description: 'Al iniciar, el sistema realizará el cruce de padrones educativos contra las inscripciones actuales de forma automática.',
+                    icon: Repeat
+                };
+        }
+    };
+
+    const config = getTypeConfig();
+    const IconComponent = config.icon;
+
     return (
-        <Modal isOpen={isOpen} onClose={handleClose} title="Cruce de Inscripciones" maxWidth="md">
+        <Modal isOpen={isOpen} onClose={handleClose} title={config.title} maxWidth="md">
             <div className="space-y-8 py-4">
                 {status === 'idle' && (
                     <div className="flex flex-col items-center text-center space-y-6">
                         <div className="w-24 h-24 bg-orange-50 rounded-full flex items-center justify-center text-[#ff8200] shadow-xl shadow-orange-100/50 animate-in zoom-in duration-500">
-                            <Repeat size={40} />
+                            <IconComponent size={40} />
                         </div>
                         <div className="space-y-2">
-                            <h4 className="text-xl font-black text-slate-800 uppercase tracking-tight">Sincronización Manual</h4>
+                            <h4 className="text-xl font-black text-slate-800 uppercase tracking-tight">{config.title}</h4>
                             <p className="text-slate-400 text-xs font-bold uppercase tracking-widest leading-relaxed max-w-[280px]">
-                                Al iniciar, el sistema realizará el cruce de padrones educativos contra las inscripciones actuales de forma automática.
+                                {config.description}
                             </p>
                         </div>
                         <button

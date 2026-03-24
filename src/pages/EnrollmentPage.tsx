@@ -9,11 +9,13 @@ import { EnrollmentToolbar } from '../features/enrollments/components/Enrollment
 import { EnrollmentModals } from '../features/enrollments/components/EnrollmentModals';
 import { HelpModal } from '../features/enrollments/components/HelpModal';
 import { ExportCsvModal } from '../features/enrollments/components/ExportCsvModal';
+import { RegistrySearchModal } from '../features/enrollments/components/RegistrySearchModal';
 import { Pagination } from '../components/ui/Pagination';
 
 export const EnrollmentPage = () => {
     const { user } = useAuth();
     const [isHelpOpen, setIsHelpOpen] = useState(false);
+    const [isRegistrySearchOpen, setIsRegistrySearchOpen] = useState(false);
 
     const {
         enrollments, isLoading, searchTerm, setSearchTerm,
@@ -82,6 +84,7 @@ export const EnrollmentPage = () => {
                         onOpenExportModal: () => setIsExportModalOpen(true),
                         loading: isExporting
                     }}
+                    onOpenRegistrySearch={() => setIsRegistrySearchOpen(true)}
                 />
 
                 <div className="flex items-center gap-4 px-4 py-3 bg-blue-50/50 rounded-2xl border border-blue-100 max-w-fit mx-2">
@@ -129,6 +132,11 @@ export const EnrollmentPage = () => {
                     setSelectedEnrollment, setActiveTab, setStatusSelector,
                     setConfirmAction, setDniToDelete, statusMutation, deleteMutation
                 }}
+            />
+
+            <RegistrySearchModal 
+                isOpen={isRegistrySearchOpen} 
+                onClose={() => setIsRegistrySearchOpen(false)} 
             />
 
             <ExportCsvModal

@@ -8,9 +8,10 @@ interface EnrollmentToolbarProps {
         onOpenExportModal: () => void;
         loading: boolean;
     };
+    onOpenRegistrySearch?: () => void;
 }
 
-export const EnrollmentToolbar = ({ searchTerm, setSearchTerm, exportProps, showExport = false }: EnrollmentToolbarProps) => {
+export const EnrollmentToolbar = ({ searchTerm, setSearchTerm, exportProps, showExport = false, onOpenRegistrySearch }: EnrollmentToolbarProps) => {
     const { onOpenExportModal, loading } = exportProps;
 
     return (
@@ -39,8 +40,22 @@ export const EnrollmentToolbar = ({ searchTerm, setSearchTerm, exportProps, show
                     )}
                 </div>
 
-                {/* Botón Exportar */}
-                {showExport && (
+                {/* Botones de Acción */}
+                <div className="flex items-center gap-3">
+                    {/* Botón Buscar en Padrón */}
+                    {onOpenRegistrySearch && (
+                        <button
+                            onClick={onOpenRegistrySearch}
+                            className="flex items-center gap-2 px-6 py-4 bg-blue-500 hover:bg-blue-600 active:scale-95 text-white rounded-xl transition-all shadow-lg shadow-blue-200 whitespace-nowrap
+                            cursor-pointer hover:-translate-y-0.5"
+                        >
+                            <Search size={18} />
+                            <span className="text-xs font-black uppercase tracking-widest sm:inline">Padrón</span>
+                        </button>
+                    )}
+
+                    {/* Botón Exportar */}
+                    {showExport && (
                     <button
                         onClick={onOpenExportModal}
                         disabled={loading}
@@ -57,6 +72,7 @@ export const EnrollmentToolbar = ({ searchTerm, setSearchTerm, exportProps, show
                         <span className="text-xs font-black uppercase tracking-widest sm:inline">Exportar CSV</span>
                     </button>
                 )}
+                </div>
             </div>
         </section>
     );

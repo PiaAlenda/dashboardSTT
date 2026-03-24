@@ -63,5 +63,14 @@ export const enrollmentService = {
     },
 
     crossCheck: () =>
-        api.post('admin/enrollments/cross-check').then(res => res.data)
+        api.post('admin/enrollments/cross-check').then(res => res.data),
+
+    crossCheckRejected: () =>
+        api.post('admin/enrollments/cross-check/rejected-only').then(res => res.data),
+
+    crossCheckProcessAll: () =>
+        api.post('admin/enrollments/cross-check/process-all').then(res => res.data),
+
+    crossCheckPending: () =>
+        api.post('admin/enrollments/cross-check/pending-only').then(res => res.data)
 };

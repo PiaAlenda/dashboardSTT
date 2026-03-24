@@ -52,7 +52,7 @@ export const RejectionChart = ({ type = 'bar', data }: RejectionChartProps) => {
                 </div>
             ) : (
                 <ResponsiveContainer width="100%" height={Math.max(300, data.length * 50)}>
-                    <BarChart data={data} layout="vertical" margin={{ left: 10, right: 30, top: 20, bottom: 20 }}>
+                    <BarChart data={data} layout="vertical" margin={{ left: -10, right: 30, top: 20, bottom: 20 }}>
                         <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
                         <XAxis type="number" hide />
                         <YAxis
@@ -60,14 +60,14 @@ export const RejectionChart = ({ type = 'bar', data }: RejectionChartProps) => {
                             type="category"
                             axisLine={false}
                             tickLine={false}
-                            width={150}
+                            width={180}
                             tick={(props) => {
                                 const { x, y, payload } = props;
-                                const text = payload.value.length > 25 ? `${payload.value.substring(0, 22)}...` : payload.value;
+                                const text = payload.value.length > 28 ? `${payload.value.substring(0, 25)}...` : payload.value;
                                 return (
                                     <g transform={`translate(${x},${y})`}>
                                         <text
-                                            x={0}
+                                            x={-5}
                                             y={0}
                                             dy={4}
                                             textAnchor="end"
@@ -84,7 +84,25 @@ export const RejectionChart = ({ type = 'bar', data }: RejectionChartProps) => {
                         />
                         <Tooltip
                             cursor={{ fill: '#f8fafc' }}
-                            contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                            wrapperStyle={{ outline: 'none', zIndex: 100 }}
+                            content={({ active, payload }) => {
+                                if (active && payload && payload.length) {
+                                    return (
+                                        <div className="bg-white p-3 rounded-2xl shadow-xl border border-slate-50 max-w-[280px]">
+                                            <p className="text-[10px] font-black uppercase text-secondary-400 tracking-widest mb-1.5 leading-relaxed break-words whitespace-normal">
+                                                {payload[0].payload.name}
+                                            </p>
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: payload[0].color }} />
+                                                <span className="text-sm font-black text-slate-800">
+                                                    {payload[0].value} <span className="text-[10px] text-slate-400 font-bold uppercase ml-1 italic">Rechazos</span>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    );
+                                }
+                                return null;
+                            }}
                         />
                         <Bar dataKey="value" radius={[0, 8, 8, 0]}>
                             {data.map((entry, index) => (

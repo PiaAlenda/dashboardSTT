@@ -46,6 +46,7 @@ export interface Enrollment {
     customField2?: string;
     customField3?: string;
     dniTramite?: string;
+    shift?: string;
 }
 
 export interface AuthState {
@@ -95,10 +96,30 @@ export interface Statistics {
         educationLevelName: string;
         count: number;
     }[];
+    bySource?: {
+        id: number;
+        name: string;
+        count: number;
+    }[];
 }
 
 export interface ChartDataItem {
     name: string;
     value: number;
     color: string;
+}
+
+export interface RegistryPerson {
+    dni: string;
+    fullName: string;
+    gender: string | null;
+    institution: string | null;
+    educationLevel: string | null;
+    career: string | null;
+    schoolYear: string | null;
+    shift: string | null;
+    locality: string | null;
+    lastUpdated: string | null;
+    beneficiaryType: { active: boolean; code: string; id: number; name: string } | null;
+    registrySource: { active: boolean; code: string; id: number; name: string } | null;
 }
