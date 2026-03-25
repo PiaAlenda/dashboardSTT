@@ -48,8 +48,8 @@ export const ShiftChart = ({ type, data }: ShiftChartProps) => {
                             type="category"
                             axisLine={false}
                             tickLine={false}
-                            width={120}
-                            tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: '900' }}
+                            width={100}
+                            tick={{ fill: '#94a3b8', fontSize: 9, fontWeight: '900' }}
                         />
                         <Tooltip
                             cursor={{ fill: '#f8fafc' }}

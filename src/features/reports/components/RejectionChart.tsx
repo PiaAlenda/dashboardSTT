@@ -60,10 +60,10 @@ export const RejectionChart = ({ type = 'bar', data }: RejectionChartProps) => {
                             type="category"
                             axisLine={false}
                             tickLine={false}
-                            width={180}
+                            width={120}
                             tick={(props) => {
                                 const { x, y, payload } = props;
-                                const text = payload.value.length > 28 ? `${payload.value.substring(0, 25)}...` : payload.value;
+                                const text = payload.value.length > 20 ? `${payload.value.substring(0, 18)}...` : payload.value;
                                 return (
                                     <g transform={`translate(${x},${y})`}>
                                         <text

@@ -19,8 +19,8 @@ export const AnalyticsCard = ({ title, subtitle, children, onExpand, hideTypeTog
             {/* Corner Decor */}
             <div className="absolute top-0 right-0 w-32 h-32 bg-orange-50 opacity-0 group-hover:opacity-100 blur-3xl transition-opacity duration-700 -translate-y-1/2 translate-x-1/2 pointer-events-none" />
             
-            <div className="flex items-start justify-between mb-6 relative z-10">
-                <div>
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6 relative z-10 w-full">
+                <div className="w-full md:w-auto">
                     <h3 className="text-xl font-black text-slate-800 tracking-tight group-hover:text-[#ff8200] transition-colors duration-300">{title}</h3>
                     {subtitle && (
                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mt-2 flex items-center gap-2">
@@ -30,8 +30,10 @@ export const AnalyticsCard = ({ title, subtitle, children, onExpand, hideTypeTog
                     )}
                 </div>
 
-                <div className="flex items-center gap-3">
-                    {headerAction}
+                <div className="flex flex-wrap items-center gap-3 w-full md:w-auto mt-2 md:mt-0">
+                    <div className="w-full md:w-auto mb-2 md:mb-0">
+                        {headerAction}
+                    </div>
 
                     {!hideTypeToggle && (
                         <div className="flex items-center p-1.5 bg-slate-100/50 rounded-2xl border border-slate-200/50 shadow-inner backdrop-blur-sm">

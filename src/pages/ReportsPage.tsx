@@ -268,8 +268,8 @@ export const ReportsPage = () => {
             </section>
 
             {/* TABS NAVIGATION */}
-            <nav className="px-2 pt-6 flex flex-col md:flex-row items-center justify-between gap-4">
-                <div className="flex p-1.5 bg-slate-100 rounded-[1.75rem] w-fit shadow-inner">
+            <nav className="px-2 pt-6 flex flex-col items-center justify-between gap-4 w-full">
+                <div className="flex flex-wrap justify-center p-1.5 bg-slate-100 rounded-[1.75rem] w-full md:w-fit shadow-inner gap-1">
                     {tabs.map((tab) => (
                         <button
                             key={tab.id}

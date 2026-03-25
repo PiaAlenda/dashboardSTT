@@ -41,7 +41,7 @@ export const EnrollmentToolbar = ({ searchTerm, setSearchTerm, exportProps, show
                 </div>
 
                 {/* Botones de Acción */}
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
                     {/* Botón Buscar en Padrón */}
                     {onOpenRegistrySearch && (
                         <button

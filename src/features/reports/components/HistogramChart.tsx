@@ -110,7 +110,7 @@ export const HistogramChart = ({ data, color = '#ff8200' }: HistogramChartProps)
                             }, []);
 
                             return (
-                                <div className="flex justify-end gap-6 mb-4">
+                                <div className="flex flex-wrap justify-end gap-3 md:gap-6 mb-4">
                                     {uniqueLegend?.map((entry: any, index: number) => (
                                         <div key={`item-${index}`} className="flex items-center gap-2">
                                             <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />

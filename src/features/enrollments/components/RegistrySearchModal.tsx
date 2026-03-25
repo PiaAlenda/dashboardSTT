@@ -66,7 +66,7 @@ export const RegistrySearchModal = ({ isOpen, onClose }: RegistrySearchModalProp
 
                 <div className="p-8">
                     {/* Search Form */}
-                    <form onSubmit={handleSearch} className="flex gap-4 mb-8">
+                    <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-4 mb-8">
                         <div className="relative flex-1">
                             <Fingerprint className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
                             <input 

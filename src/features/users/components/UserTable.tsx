@@ -23,7 +23,7 @@ export const UserTable = ({
         <div className="space-y-6">
 
             {/* --- HEADER --- */}
-            <div className="flex justify-between items-center bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+            <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
                 <h2 className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 flex items-center gap-2">
                     <UserIcon size={14} className="text-[#ff8200]" />
                     Personal Registrado ({users.length})

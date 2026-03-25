@@ -48,7 +48,7 @@ export const LevelChart = ({ type, data }: LevelChartProps) => {
                             type="category"
                             axisLine={false}
                             tickLine={false}
-                            width={130}
+                            width={100}
                             tick={{ fill: '#94a3b8', fontSize: 9, fontWeight: '900' }}
                         />
                         <Tooltip
