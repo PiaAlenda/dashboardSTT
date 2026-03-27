@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/apiuccuyo/:path*",
+      "destination": "https://guarani.uccuyo.edu.ar/apiuccuyo/:path*"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

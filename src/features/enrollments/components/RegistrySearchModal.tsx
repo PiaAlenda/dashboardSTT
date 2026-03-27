@@ -13,13 +13,10 @@ interface RegistrySearchModalProps {
 export const RegistrySearchModal = ({ isOpen, onClose }: RegistrySearchModalProps) => {
     const [dni, setDni] = useState('');
     const [searchType, setSearchType] = useState<SearchType>('local');
-
-    // Mutación Local
     const localMutation = useMutation({
         mutationFn: (searchDni: string) => registryService.getByDni(searchDni)
     });
-
-    // Mutación UCC con Cache Busting (evita el 304 que te daba problemas)
+    
     const uccMutation = useMutation({
         mutationFn: async (searchDni: string) => {
             const response = await fetch(`/apiuccuyo/verificar_dni.php?dni=${searchDni}&t=${Date.now()}`);
