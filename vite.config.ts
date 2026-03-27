@@ -7,5 +7,15 @@ export default defineConfig({
   server: {
     host: true,
     port: 5176,
+    proxy: {
+      '/apicidi': {
+        target: 'http://10.2.149.51:8000',
+        changeOrigin: true,
+      },
+      '/apiuccuyo': {
+        target: 'https://guarani.uccuyo.edu.ar',
+        changeOrigin: true,
+      }
+    }
   },
 })
