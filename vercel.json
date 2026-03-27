@@ -5,6 +5,10 @@
       "destination": "https://guarani.uccuyo.edu.ar/apiuccuyo/:path*"
     },
     {
+      "source": "/apicidi/:path*",
+      "destination": "http://10.2.149.51:8000/apicidi/:path*"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
