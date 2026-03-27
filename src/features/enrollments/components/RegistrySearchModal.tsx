@@ -14,13 +14,15 @@ export const RegistrySearchModal = ({ isOpen, onClose }: RegistrySearchModalProp
     const [dni, setDni] = useState('');
     const [searchType, setSearchType] = useState<SearchType>('local');
 
+    // Mutación Local
     const localMutation = useMutation({
         mutationFn: (searchDni: string) => registryService.getByDni(searchDni)
     });
 
+    // Mutación UCC con Cache Busting (evita el 304 que te daba problemas)
     const uccMutation = useMutation({
         mutationFn: async (searchDni: string) => {
-            const response = await fetch(`/apiuccuyo/verificar_dni.php?dni=${searchDni}`);
+            const response = await fetch(`/apiuccuyo/verificar_dni.php?dni=${searchDni}&t=${Date.now()}`);
             if (!response.ok) throw new Error('Network response was not ok');
             return response.json();
         }
@@ -30,6 +32,7 @@ export const RegistrySearchModal = ({ isOpen, onClose }: RegistrySearchModalProp
 
     const isPending = localMutation.isPending || uccMutation.isPending;
     const isSigeMode = searchType === 'sige';
+
     const isSuccess = (localMutation.isSuccess && localMutation.data) || (uccMutation.isSuccess && uccMutation.data?.existe);
     const isNotFound = (localMutation.isSuccess && !localMutation.data) ||
         (uccMutation.isSuccess && uccMutation.data && !uccMutation.data.existe) ||
@@ -37,12 +40,10 @@ export const RegistrySearchModal = ({ isOpen, onClose }: RegistrySearchModalProp
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
-        if (isSigeMode) return;
-        if (dni.trim()) {
-            const cleanDni = dni.trim().replace(/\s+/g, '');
-            if (searchType === 'local') localMutation.mutate(cleanDni);
-            else if (searchType === 'ucc') uccMutation.mutate(cleanDni);
-        }
+        if (isSigeMode || !dni.trim()) return;
+        const cleanDni = dni.trim().replace(/\D/g, ''); 
+        if (searchType === 'local') localMutation.mutate(cleanDni);
+        else if (searchType === 'ucc') uccMutation.mutate(cleanDni);
     };
 
     const resetMutations = () => {
@@ -57,7 +58,6 @@ export const RegistrySearchModal = ({ isOpen, onClose }: RegistrySearchModalProp
         resetMutations();
         onClose();
     };
-
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 text-slate-900">
             <div
