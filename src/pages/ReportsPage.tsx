@@ -143,11 +143,25 @@ export const ReportsPage = () => {
     const [expandedChart, setExpandedChart] = useState<{ title: string; component: React.ReactNode; data: any[] } | null>(null);
     const [activeTab, setActiveTab] = useState<'general' | 'academic' | 'logistics'>('general');
     const [academicRole, setAcademicRole] = useState<'students' | 'teachers'>('students');
-    const [dateRange, setDateRange] = useState('last30');
+    const [dateRange, setDateRange] = useState('all');
     const [customDates, setCustomDates] = useState({
         start: new Date().toISOString().split('T')[0],
         end: new Date().toISOString().split('T')[0]
     });
+
+    const heroTitle = useMemo(() => {
+        const titles: Record<string, string> = {
+            today: 'Inscripciones de Hoy',
+            yesterday: 'Inscripciones de Ayer',
+            week: 'Inscripciones de la Semana',
+            month: 'Inscripciones del Mes',
+            last30: 'Inscripciones del Mes',
+            custom: 'Inscripciones del Periodo',
+            all: 'Total de Inscripciones'
+        };
+        return titles[dateRange] || 'Total de Inscripciones';
+    }, [dateRange]);
+
     const now = useMemo(() => new Date(), []);
     const firstDayOfMonth = useMemo(() => new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0], [now]);
     const lastDayOfMonth = useMemo(() => new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0], [now]);
@@ -230,7 +244,7 @@ export const ReportsPage = () => {
                                 Métrica Principal del Sistema
                             </span>
                             <h2 className="text-4xl md:text-6xl font-black tracking-tighter mb-2">
-                                Total de <span className="text-[#ff8200]">Inscripciones</span>
+                                {heroTitle.split(' ').slice(0, -1).join(' ')} <span className="text-[#ff8200]">{heroTitle.split(' ').slice(-1)}</span>
                             </h2>
                             <p className="text-slate-400 font-medium text-sm md:text-base max-w-md">
                                 Volumen consolidado de solicitudes procesadas en el periodo seleccionado.
