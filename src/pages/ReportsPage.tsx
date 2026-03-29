@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { BarChart3, Calendar } from 'lucide-react';
 import { AnalyticsCard } from '../features/reports/components/AnalyticsCard';
 import { StatusChart } from '../features/reports/components/StatusChart';
@@ -15,7 +15,7 @@ import { ChartModal } from '../features/reports/components/ChartModal';
 import { useReports } from '../features/reports/hooks/useReports';
 import { LoadingOverlay } from '../components/ui/LoadingOverlay';
 
-import { ChevronDown, Clock, Bus, Check, X } from 'lucide-react';
+import { ChevronDown, Clock, Bus, Check } from 'lucide-react';
 
 const AdvancedDateFilter = ({
     selected,
@@ -150,15 +150,6 @@ export const ReportsPage = () => {
         end: new Date().toISOString().split('T')[0]
     });
     const [rankingLimit, setRankingLimit] = useState(15);
-    const [debouncedRankingLimit, setDebouncedRankingLimit] = useState(15);
-    const [showCustomLimit, setShowCustomLimit] = useState(false);
-
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setDebouncedRankingLimit(rankingLimit);
-        }, 600);
-        return () => clearTimeout(timer);
-    }, [rankingLimit]);
 
     const heroTitle = useMemo(() => {
         const titles: Record<string, string> = {
@@ -195,7 +186,7 @@ export const ReportsPage = () => {
     const lastDayOfMonth = useMemo(() => new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0], [now]);
 
     const [histDates, setHistDates] = useState({ start: firstDayOfMonth, end: lastDayOfMonth });
-    const { charts, statsGrid, isLoading, isSchoolRankingLoading } = useReports(dateRange, customDates.start, customDates.end, debouncedRankingLimit);
+    const { charts, statsGrid, isLoading, isSchoolRankingLoading } = useReports(dateRange, customDates.start, customDates.end, rankingLimit);
 
     const filteredHistogramData = useMemo(() => {
         const data = charts?.dailyDetailed || [];
@@ -445,41 +436,15 @@ export const ReportsPage = () => {
                                 hideTypeToggle
                                 headerAction={
                                     <div className="flex items-center gap-2 bg-slate-50 p-1 rounded-2xl border border-slate-200 shadow-sm">
-                                        {!showCustomLimit ? (
-                                            <>
-                                                {[15, 50, 100].map((l) => (
-                                                    <button
-                                                        key={l}
-                                                        onClick={() => setRankingLimit(l)}
-                                                        className={`px-3 py-1.5 rounded-xl text-[10px] font-black transition-all ${rankingLimit === l ? 'bg-blue-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-600'}`}
-                                                    >
-                                                        {l}
-                                                    </button>
-                                                ))}
-                                                <button
-                                                    onClick={() => setShowCustomLimit(true)}
-                                                    className="px-3 py-1.5 rounded-xl text-[10px] font-black text-blue-600 hover:bg-blue-50 transition-all"
-                                                >
-                                                    OTRO
-                                                </button>
-                                            </>
-                                        ) : (
-                                            <div className="flex items-center gap-2 px-2">
-                                                <input 
-                                                    type="number"
-                                                    autoFocus
-                                                    value={rankingLimit}
-                                                    onChange={(e) => setRankingLimit(Math.max(1, Number(e.target.value)))}
-                                                    className="w-12 bg-white border border-slate-200 rounded-lg text-[10px] font-black text-blue-600 text-center py-1 outline-none focus:ring-2 focus:ring-blue-100"
-                                                />
-                                                <button 
-                                                    onClick={() => setShowCustomLimit(false)}
-                                                    className="p-1 text-slate-400 hover:text-slate-600 transition-colors"
-                                                >
-                                                    <X size={14} />
-                                                </button>
-                                            </div>
-                                        )}
+                                        {[15, 50, 100].map((l) => (
+                                            <button
+                                                key={l}
+                                                onClick={() => setRankingLimit(l)}
+                                                className={`px-3 py-1.5 rounded-xl text-[10px] font-black transition-all ${rankingLimit === l ? 'bg-blue-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-600'}`}
+                                            >
+                                                TOP {l}
+                                            </button>
+                                        ))}
                                     </div>
                                 }
                                 onExpand={() => setExpandedChart({
