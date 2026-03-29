@@ -162,6 +162,23 @@ export const ReportsPage = () => {
         return titles[dateRange] || 'Total de Inscripciones';
     }, [dateRange]);
 
+    const heroDateRange = useMemo(() => {
+        const fmt = (d: Date) =>
+            d.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        const today = new Date();
+        if (dateRange === 'month') {
+            const start = new Date(today.getFullYear(), today.getMonth(), 1);
+            const end = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+            return `${fmt(start)} — ${fmt(end)}`;
+        }
+        if (dateRange === 'last30') {
+            const start = new Date(today);
+            start.setDate(today.getDate() - 29);
+            return `${fmt(start)} — ${fmt(today)}`;
+        }
+        return null;
+    }, [dateRange]);
+
     const now = useMemo(() => new Date(), []);
     const firstDayOfMonth = useMemo(() => new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0], [now]);
     const lastDayOfMonth = useMemo(() => new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0], [now]);
@@ -246,6 +263,11 @@ export const ReportsPage = () => {
                             <h2 className="text-4xl md:text-6xl font-black tracking-tighter mb-2">
                                 {heroTitle.split(' ').slice(0, -1).join(' ')} <span className="text-[#ff8200]">{heroTitle.split(' ').slice(-1)}</span>
                             </h2>
+                            {heroDateRange && (
+                                <p className="text-[#ff8200]/80 font-bold text-xs md:text-sm tracking-widest uppercase mb-2">
+                                    {heroDateRange}
+                                </p>
+                            )}
                             <p className="text-slate-400 font-medium text-sm md:text-base max-w-md">
                                 Volumen consolidado de solicitudes procesadas en el periodo seleccionado.
                             </p>
