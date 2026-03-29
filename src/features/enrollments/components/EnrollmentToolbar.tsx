@@ -9,9 +9,10 @@ interface EnrollmentToolbarProps {
         loading: boolean;
     };
     onOpenRegistrySearch?: () => void;
+    onOpenChangeTramite?: () => void;
 }
 
-export const EnrollmentToolbar = ({ searchTerm, setSearchTerm, exportProps, showExport = false, onOpenRegistrySearch }: EnrollmentToolbarProps) => {
+export const EnrollmentToolbar = ({ searchTerm, setSearchTerm, exportProps, showExport = false, onOpenRegistrySearch, onOpenChangeTramite }: EnrollmentToolbarProps) => {
     const { onOpenExportModal, loading } = exportProps;
 
     return (
@@ -46,11 +47,27 @@ export const EnrollmentToolbar = ({ searchTerm, setSearchTerm, exportProps, show
                     {onOpenRegistrySearch && (
                         <button
                             onClick={onOpenRegistrySearch}
-                            className="flex items-center gap-2 px-6 py-4 bg-blue-500 hover:bg-blue-600 active:scale-95 text-white rounded-xl transition-all shadow-lg shadow-blue-200 whitespace-nowrap
+                            className="group flex items-center gap-0 hover:gap-2 px-4 py-4 bg-blue-500 hover:bg-blue-600 active:scale-95 text-white rounded-xl transition-all shadow-lg shadow-blue-200 whitespace-nowrap
                             cursor-pointer hover:-translate-y-0.5"
                         >
-                            <Search size={18} />
-                            <span className="text-xs font-black uppercase tracking-widest sm:inline">Padrón</span>
+                            <Search size={18} className="shrink-0" />
+                            <span className="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-500 ease-in-out">
+                                <span className="pl-2 text-xs font-black uppercase tracking-widest">Padrón</span>
+                            </span>
+                        </button>
+                    )}
+
+                    {/* Botón Cambiar Trámite */}
+                    {onOpenChangeTramite && (
+                        <button
+                            onClick={onOpenChangeTramite}
+                            className="group flex items-center gap-0 hover:gap-2 px-4 py-4 bg-orange-500 hover:bg-orange-600 active:scale-95 text-white rounded-xl transition-all shadow-lg shadow-orange-200 whitespace-nowrap
+                            cursor-pointer hover:-translate-y-0.5"
+                        >
+                            <Download size={18} className="rotate-180 shrink-0" />
+                            <span className="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-500 ease-in-out">
+                                <span className="pl-2 text-xs font-black uppercase tracking-widest">Cambiar Trámite</span>
+                            </span>
                         </button>
                     )}
 
@@ -59,17 +76,23 @@ export const EnrollmentToolbar = ({ searchTerm, setSearchTerm, exportProps, show
                     <button
                         onClick={onOpenExportModal}
                         disabled={loading}
-                        className="flex items-center gap-2 px-6 py-4 bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white rounded-xl transition-all shadow-lg shadow-emerald-200 whitespace-nowrap
+                        className="group flex items-center gap-0 hover:gap-2 px-4 py-4 bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white rounded-xl transition-all shadow-lg shadow-emerald-200 whitespace-nowrap
                         cursor-pointer hover:-translate-y-0.5
                         disabled:cursor-not-allowed disabled:hover:translate-y-0
                         disabled:opacity-50 disabled:shadow-none disabled:grayscale"
                     >
                         {loading ? (
-                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            <div className="w-18 flex justify-center">
+                                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            </div>
                         ) : (
-                            <Download size={18} />
+                            <>
+                                <Download size={18} className="shrink-0" />
+                                <span className="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-500 ease-in-out">
+                                    <span className="pl-2 text-xs font-black uppercase tracking-widest">Exportar CSV</span>
+                                </span>
+                            </>
                         )}
-                        <span className="text-xs font-black uppercase tracking-widest sm:inline">Exportar CSV</span>
                     </button>
                 )}
                 </div>

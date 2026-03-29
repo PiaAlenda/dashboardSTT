@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { BarChart3, Calendar } from 'lucide-react';
 import { AnalyticsCard } from '../features/reports/components/AnalyticsCard';
 import { StatusChart } from '../features/reports/components/StatusChart';
@@ -10,11 +10,12 @@ import { RejectionChart } from '../features/reports/components/RejectionChart';
 import { LinesChart } from '../features/reports/components/LinesChart';
 import { CompanyChart } from '../features/reports/components/CompanyChart';
 import { HistogramChart } from '../features/reports/components/HistogramChart';
+import { SchoolRankingChart } from '../features/reports/components/SchoolRankingChart';
 import { ChartModal } from '../features/reports/components/ChartModal';
 import { useReports } from '../features/reports/hooks/useReports';
 import { LoadingOverlay } from '../components/ui/LoadingOverlay';
 
-import { ChevronDown, Clock, Bus, Check } from 'lucide-react';
+import { ChevronDown, Clock, Bus, Check, X } from 'lucide-react';
 
 const AdvancedDateFilter = ({
     selected,
@@ -148,6 +149,16 @@ export const ReportsPage = () => {
         start: new Date().toISOString().split('T')[0],
         end: new Date().toISOString().split('T')[0]
     });
+    const [rankingLimit, setRankingLimit] = useState(15);
+    const [debouncedRankingLimit, setDebouncedRankingLimit] = useState(15);
+    const [showCustomLimit, setShowCustomLimit] = useState(false);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedRankingLimit(rankingLimit);
+        }, 600);
+        return () => clearTimeout(timer);
+    }, [rankingLimit]);
 
     const heroTitle = useMemo(() => {
         const titles: Record<string, string> = {
@@ -184,7 +195,7 @@ export const ReportsPage = () => {
     const lastDayOfMonth = useMemo(() => new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0], [now]);
 
     const [histDates, setHistDates] = useState({ start: firstDayOfMonth, end: lastDayOfMonth });
-    const { charts, statsGrid, isLoading } = useReports(dateRange, customDates.start, customDates.end);
+    const { charts, statsGrid, isLoading, isSchoolRankingLoading } = useReports(dateRange, customDates.start, customDates.end, debouncedRankingLimit);
 
     const filteredHistogramData = useMemo(() => {
         const data = charts?.dailyDetailed || [];
@@ -424,6 +435,72 @@ export const ReportsPage = () => {
                                 })}
                             >
                                 {(type) => <SourceChart type={type} data={charts.source} />}
+                            </AnalyticsCard>
+                        </div>
+
+                        <div className="grid grid-cols-1 gap-8">
+                            <AnalyticsCard
+                                title="Ranking de Instituciones"
+                                subtitle={`Top ${rankingLimit} establecimientos con más alumnos aprobados`}
+                                hideTypeToggle
+                                headerAction={
+                                    <div className="flex items-center gap-2 bg-slate-50 p-1 rounded-2xl border border-slate-200 shadow-sm">
+                                        {!showCustomLimit ? (
+                                            <>
+                                                {[15, 50, 100].map((l) => (
+                                                    <button
+                                                        key={l}
+                                                        onClick={() => setRankingLimit(l)}
+                                                        className={`px-3 py-1.5 rounded-xl text-[10px] font-black transition-all ${rankingLimit === l ? 'bg-blue-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-600'}`}
+                                                    >
+                                                        {l}
+                                                    </button>
+                                                ))}
+                                                <button
+                                                    onClick={() => setShowCustomLimit(true)}
+                                                    className="px-3 py-1.5 rounded-xl text-[10px] font-black text-blue-600 hover:bg-blue-50 transition-all"
+                                                >
+                                                    OTRO
+                                                </button>
+                                            </>
+                                        ) : (
+                                            <div className="flex items-center gap-2 px-2">
+                                                <input 
+                                                    type="number"
+                                                    autoFocus
+                                                    value={rankingLimit}
+                                                    onChange={(e) => setRankingLimit(Math.max(1, Number(e.target.value)))}
+                                                    className="w-12 bg-white border border-slate-200 rounded-lg text-[10px] font-black text-blue-600 text-center py-1 outline-none focus:ring-2 focus:ring-blue-100"
+                                                />
+                                                <button 
+                                                    onClick={() => setShowCustomLimit(false)}
+                                                    className="p-1 text-slate-400 hover:text-slate-600 transition-colors"
+                                                >
+                                                    <X size={14} />
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                }
+                                onExpand={() => setExpandedChart({
+                                    title: "Ranking de Instituciones",
+                                    component: <SchoolRankingChart data={charts.schoolRanking} />,
+                                    data: charts.schoolRanking
+                                })}
+                            >
+                                {() => (
+                                    <div className="relative">
+                                        {isSchoolRankingLoading && (
+                                            <div className="absolute inset-0 z-10 bg-white/40 backdrop-blur-[2px] flex items-center justify-center rounded-2xl animate-in fade-in duration-300">
+                                                <div className="flex flex-col items-center gap-2">
+                                                    <div className="w-8 h-8 border-4 border-blue-600/20 border-t-blue-600 rounded-full animate-spin" />
+                                                    <span className="text-[9px] font-black text-blue-600 uppercase tracking-widest">Recalculando...</span>
+                                                </div>
+                                            </div>
+                                        )}
+                                        <SchoolRankingChart data={charts.schoolRanking} />
+                                    </div>
+                                )}
                             </AnalyticsCard>
                         </div>
                     </div>

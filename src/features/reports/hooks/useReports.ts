@@ -6,7 +6,7 @@ import { enrollmentService } from '../../../services/enrollmentService';
 import { masterDataService } from '../../../services/masterDataService';
 import type { Enrollment, ChartDataItem } from '../../../types';
 
-export const useReports = (range: string = 'month', customStart?: string, customEnd?: string) => {
+export const useReports = (range: string = 'month', customStart?: string, customEnd?: string, rankingLimit: number = 15) => {
     const statsQuery = useQuery({
         queryKey: ['statistics', range],
         queryFn: () => statsService.getStatistics(range),
@@ -37,13 +37,19 @@ export const useReports = (range: string = 'month', customStart?: string, custom
         queryFn: masterDataService.getRejectionReasons,
     });
 
+    const schoolRankingQuery = useQuery({
+        queryKey: ['school-ranking', rankingLimit],
+        queryFn: () => enrollmentService.getSchoolRanking(rankingLimit),
+    });
+
     const isLoading =
         statsQuery.isLoading ||
         detailedStatsQuery.isLoading ||
         enrollmentsQuery.isLoading ||
         claimsQuery.isLoading ||
         beneficiaryTypesQuery.isLoading ||
-        rejectionReasonsQuery.isLoading;
+        rejectionReasonsQuery.isLoading ||
+        schoolRankingQuery.isLoading;
 
     const detailedStats = detailedStatsQuery.data || null;
     const rawEnrollments = (enrollmentsQuery.data as any)?.data || enrollmentsQuery.data || [];
@@ -256,6 +262,16 @@ export const useReports = (range: string = 'month', customStart?: string, custom
         return Object.values(dateMap).sort((a, b) => a.date.getTime() - b.date.getTime());
     }, [detailedStats]);
 
+    const schoolRankingData = useMemo<ChartDataItem[]>(() => {
+        const raw = schoolRankingQuery.data || [];
+        const colors = ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ec4899', '#6366f1', '#f43f5e', '#14b8a6'];
+        return raw.map((s: any, index: number) => ({
+            name: s.schoolName || s.name || 'Desconocido',
+            value: s.approvedCount || s.count || 0,
+            color: colors[index % colors.length]
+        }));
+    }, [schoolRankingQuery.data]);
+
     const totalEnrollments = filteredEnrollments.length;
     const approvalsInPeriod = rawEnrollments.filter((e: Enrollment) =>
         e.status?.toUpperCase() === 'APROBADO' && isDateInRange(e.updatedAt || e.createdAt || '')
@@ -324,6 +340,7 @@ export const useReports = (range: string = 'month', customStart?: string, custom
             busCompanies: busCompaniesChartData,
             dailyEnrollments: dailyEnrollmentsData,
             dailyDetailed: dailyDetailedData,
+            schoolRanking: schoolRankingData,
             university: detailedStats ? [
                 { name: 'UNSJ', value: detailedStats.totalEstudiantesUnsj, color: '#3b82f6' },
                 { name: 'UC', value: detailedStats.totalEstudiantesUc, color: '#8b5cf6' },
@@ -331,6 +348,8 @@ export const useReports = (range: string = 'month', customStart?: string, custom
             ].filter(v => v.value > 0) : []
         },
         statsGrid,
-        detailedStats
+        detailedStats,
+        schoolRanking: schoolRankingData,
+        isSchoolRankingLoading: schoolRankingQuery.isFetching
     };
 };

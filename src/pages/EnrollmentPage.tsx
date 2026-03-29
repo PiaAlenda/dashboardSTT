@@ -10,12 +10,14 @@ import { EnrollmentModals } from '../features/enrollments/components/EnrollmentM
 import { HelpModal } from '../features/enrollments/components/HelpModal';
 import { ExportCsvModal } from '../features/enrollments/components/ExportCsvModal';
 import { RegistrySearchModal } from '../features/enrollments/components/RegistrySearchModal';
+import { ChangeTramiteModal } from '../features/enrollments/components/ChangeTramiteModal';
 import { Pagination } from '../components/ui/Pagination';
 
 export const EnrollmentPage = () => {
     const { user } = useAuth();
     const [isHelpOpen, setIsHelpOpen] = useState(false);
     const [isRegistrySearchOpen, setIsRegistrySearchOpen] = useState(false);
+    const [isChangeTramiteOpen, setIsChangeTramiteOpen] = useState(false);
 
     const {
         enrollments, isLoading, searchTerm, setSearchTerm,
@@ -25,7 +27,7 @@ export const EnrollmentPage = () => {
         statusSelector, setStatusSelector,
         confirmAction, setConfirmAction,
         dniToDelete, setDniToDelete,
-        statusMutation, deleteMutation,
+        statusMutation, deleteMutation, updateTramiteMutation,
         exportCsvByLevel, isExportModalOpen, setIsExportModalOpen, isExporting
     } = useEnrollments();
 
@@ -85,6 +87,7 @@ export const EnrollmentPage = () => {
                         loading: isExporting
                     }}
                     onOpenRegistrySearch={() => setIsRegistrySearchOpen(true)}
+                    onOpenChangeTramite={() => setIsChangeTramiteOpen(true)}
                 />
 
                 <div className="flex items-center gap-4 px-4 py-3 bg-blue-50/50 rounded-2xl border border-blue-100 max-w-fit mx-2">
@@ -144,6 +147,12 @@ export const EnrollmentPage = () => {
                 onClose={() => setIsExportModalOpen(false)}
                 onExport={exportCsvByLevel}
                 isExporting={isExporting}
+            />
+
+            <ChangeTramiteModal
+                isOpen={isChangeTramiteOpen}
+                onClose={() => setIsChangeTramiteOpen(false)}
+                onUpdate={(dni, tramite) => updateTramiteMutation.mutateAsync({ dni, tramite })}
             />
         </div>
     );

@@ -163,6 +163,14 @@ export const useEnrollments = () => {
         }
     });
 
+    const updateTramiteMutation = useMutation({
+        mutationFn: ({ dni, tramite }: { dni: string; tramite: string }) =>
+            enrollmentService.updateTramite(dni, tramite),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['enrollments'] });
+        }
+    });
+
     const exportCsvByLevel = async (level: string, startDate: string, endDate: string) => {
         try {
             setIsExporting(true);
@@ -255,6 +263,7 @@ export const useEnrollments = () => {
         setDniToDelete,
         statusMutation,
         deleteMutation,
+        updateTramiteMutation,
         exportCsvByLevel,
         isExportModalOpen,
         setIsExportModalOpen,

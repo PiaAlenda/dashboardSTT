@@ -72,5 +72,16 @@ export const enrollmentService = {
         api.post('admin/enrollments/cross-check/process-all').then(res => res.data),
 
     crossCheckPending: () =>
-        api.post('admin/enrollments/cross-check/pending-only').then(res => res.data)
+        api.post('admin/enrollments/cross-check/pending-only').then(res => res.data),
+
+    updateTramite: (dni: string, tramite: string) =>
+        api.patch(`admin/enrollments/${dni.trim()}/tramite?newDniTramite=${encodeURIComponent(tramite.trim())}`).then(res => res.data),
+
+    searchSige: (dni: string, sexo: string) =>
+        api.get(`admin/enrollments/cross-check/sige-api/test/${dni.trim()}`, {
+            params: { gender: sexo }
+        }).then(res => res.data),
+
+    getSchoolRanking: (limit: number = 15) =>
+        api.get('admin/enrollments/ranking/schools', { params: { limit } }).then(res => res.data)
 };
