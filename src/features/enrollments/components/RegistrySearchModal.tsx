@@ -40,10 +40,11 @@ export const RegistrySearchModal = ({ isOpen, onClose }: RegistrySearchModalProp
 
     const isSuccess = (localMutation.isSuccess && localMutation.data) || 
                       (uccMutation.isSuccess && uccMutation.data?.existe) ||
-                      (sigeMutation.isSuccess && sigeMutation.data);
+                      (sigeMutation.isSuccess && sigeMutation.data && (sigeMutation.data.exito || sigeMutation.data.existe || (sigeMutation.data.campos && sigeMutation.data.campos.length > 0)));
 
     const isNotFound = (localMutation.isSuccess && !localMutation.data) ||
         (uccMutation.isSuccess && uccMutation.data && !uccMutation.data.existe) ||
+        (sigeMutation.isSuccess && sigeMutation.data && !(sigeMutation.data.exito || sigeMutation.data.existe || (sigeMutation.data.campos && sigeMutation.data.campos.length > 0))) ||
         localMutation.isError || uccMutation.isError || sigeMutation.isError;
 
     const handleSearch = (e: React.FormEvent) => {
@@ -163,7 +164,7 @@ export const RegistrySearchModal = ({ isOpen, onClose }: RegistrySearchModalProp
                                         <GraduationCap size={100} />
                                     </div>
                                     <div className="relative z-10">
-                                        <h3 className="text-xl font-black uppercase tracking-tighter mb-1">{sigeMutation.data.titulo || 'Certificado de Regularidad'}</h3>
+                                        <h3 className="text-xl font-black uppercase tracking-tighter mb-1">{sigeMutation.data.titulo}</h3>
                                         <p className="text-blue-100 text-[10px] font-bold uppercase tracking-widest opacity-80">{sigeMutation.data.resumen}</p>
                                     </div>
                                 </div>
