@@ -82,6 +82,9 @@ export const enrollmentService = {
             params: { gender: sexo }
         }).then(res => res.data),
 
+    searchEduge: (dni: string) =>
+        api.get(`admin/enrollments/cross-check/eduge-api/test/${dni.trim()}`).then(res => res.data),
+
     getSchoolRanking: (limit: number = 15) =>
         api.get('admin/enrollments/ranking/schools', { params: { limit } }).then(res => res.data)
 };

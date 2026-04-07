@@ -4,7 +4,7 @@ import { useMutation } from '@tanstack/react-query';
 import { registryService } from '../../../services/registryService';
 import { enrollmentService } from '../../../services/enrollmentService';
 
-type SearchType = 'local' | 'ucc' | 'sige';
+type SearchType = 'local' | 'ucc' | 'sige' | 'eduge';
 
 interface RegistrySearchModalProps {
     isOpen: boolean;
@@ -33,19 +33,25 @@ export const RegistrySearchModal = ({ isOpen, onClose }: RegistrySearchModalProp
             enrollmentService.searchSige(searchDni, sexo)
     });
 
+    const edugeMutation = useMutation({
+        mutationFn: (searchDni: string) => enrollmentService.searchEduge(searchDni)
+    });
+
     if (!isOpen) return null;
 
-    const isPending = localMutation.isPending || uccMutation.isPending || sigeMutation.isPending;
+    const isPending = localMutation.isPending || uccMutation.isPending || sigeMutation.isPending || edugeMutation.isPending;
     const isSigeMode = searchType === 'sige';
 
     const isSuccess = (localMutation.isSuccess && localMutation.data) || 
                       (uccMutation.isSuccess && uccMutation.data?.existe) ||
-                      (sigeMutation.isSuccess && sigeMutation.data && (sigeMutation.data.exito || sigeMutation.data.existe || (sigeMutation.data.campos && sigeMutation.data.campos.length > 0)));
+                      (sigeMutation.isSuccess && sigeMutation.data && (sigeMutation.data.exito || sigeMutation.data.existe || (sigeMutation.data.campos && sigeMutation.data.campos.length > 0))) ||
+                      (edugeMutation.isSuccess && edugeMutation.data && (edugeMutation.data.exito || edugeMutation.data.existe || (edugeMutation.data.campos && edugeMutation.data.campos.length > 0)));
 
     const isNotFound = (localMutation.isSuccess && !localMutation.data) ||
         (uccMutation.isSuccess && uccMutation.data && !uccMutation.data.existe) ||
         (sigeMutation.isSuccess && sigeMutation.data && !(sigeMutation.data.exito || sigeMutation.data.existe || (sigeMutation.data.campos && sigeMutation.data.campos.length > 0))) ||
-        localMutation.isError || uccMutation.isError || sigeMutation.isError;
+        (edugeMutation.isSuccess && edugeMutation.data && !(edugeMutation.data.exito || edugeMutation.data.existe || (edugeMutation.data.campos && edugeMutation.data.campos.length > 0))) ||
+        localMutation.isError || uccMutation.isError || sigeMutation.isError || edugeMutation.isError;
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
@@ -54,6 +60,7 @@ export const RegistrySearchModal = ({ isOpen, onClose }: RegistrySearchModalProp
         if (searchType === 'local') localMutation.mutate(cleanDni);
         else if (searchType === 'ucc') uccMutation.mutate(cleanDni);
         else if (searchType === 'sige') sigeMutation.mutate({ searchDni: cleanDni, sexo: gender });
+        else if (searchType === 'eduge') edugeMutation.mutate(cleanDni);
     };
 
     const resetMutations = () => {
@@ -61,6 +68,7 @@ export const RegistrySearchModal = ({ isOpen, onClose }: RegistrySearchModalProp
         localMutation.reset();
         uccMutation.reset();
         sigeMutation.reset();
+        edugeMutation.reset();
     };
 
     const handleClose = () => {
@@ -92,7 +100,7 @@ export const RegistrySearchModal = ({ isOpen, onClose }: RegistrySearchModalProp
                 <div className="p-8">
                     {!isSuccess && !isNotFound && (
                         <div className="flex bg-slate-100/80 p-1 rounded-2xl mb-8 relative">
-                            {(['local', 'ucc', 'sige'] as SearchType[]).map((type) => (
+                            {(['local', 'ucc', 'sige', 'eduge'] as SearchType[]).map((type) => (
                                 <button
                                     key={type}
                                     type="button"
@@ -155,56 +163,64 @@ export const RegistrySearchModal = ({ isOpen, onClose }: RegistrySearchModalProp
                             </form>
                         )}
 
-                        {/* RESULTADO POSITIVO SIGE */}
-                        {isSuccess && isSigeMode && sigeMutation.data && (
+                        {/* RESULTADO POSITIVO SIGE/EDUGE */}
+                        {isSuccess && (searchType === 'sige' || searchType === 'eduge') && (sigeMutation.data || edugeMutation.data) && (
                             <div className="flex flex-col animate-in slide-in-from-bottom-4 duration-500">
-                                {/* Banner de Título */}
-                                <div className="bg-blue-600 text-white p-6 rounded-t-[2rem] shadow-xl relative overflow-hidden group">
-                                    <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform">
-                                        <GraduationCap size={100} />
-                                    </div>
-                                    <div className="relative z-10">
-                                        <h3 className="text-xl font-black uppercase tracking-tighter mb-1">{sigeMutation.data.titulo}</h3>
-                                        <p className="text-blue-100 text-[10px] font-bold uppercase tracking-widest opacity-80">{sigeMutation.data.resumen}</p>
-                                    </div>
-                                </div>
-
-                                {/* Mensaje de Confirmación y Datos */}
-                                <div className="bg-slate-50/50 border-x-2 border-b-2 border-slate-100 rounded-b-[2rem] p-6 pt-8 space-y-6">
-                                    <div className="flex items-center gap-4 p-4 bg-emerald-50 border border-emerald-100 rounded-2xl animate-in zoom-in-95 delay-150">
-                                        <div className="shrink-0 w-10 h-10 bg-emerald-500 text-white rounded-full flex items-center justify-center shadow-lg shadow-emerald-100">
-                                            <Check size={20} strokeWidth={3} />
-                                        </div>
-                                        <div>
-                                            <p className="text-emerald-900 font-black text-sm uppercase tracking-tight">¡Alumno Encontrado!</p>
-                                            <p className="text-emerald-700/70 text-xs font-bold">El alumno figura como Regular en el sistema.</p>
-                                        </div>
-                                    </div>
-
-                                    {/* Lista de Detalles */}
-                                    <div className="space-y-3">
-                                        {sigeMutation.data.campos?.map((campo: any, idx: number) => (
-                                            <div key={idx} className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-start gap-4">
-                                                <div className="p-2 bg-slate-50 rounded-lg text-slate-400 group-hover:text-blue-500 transition-colors">
-                                                    {campo.label.toLowerCase().includes('escuela') ? <MapPin size={16} /> : <User size={16} />}
+                                {(() => {
+                                    const data = searchType === 'sige' ? sigeMutation.data : edugeMutation.data;
+                                    if (!data) return null;
+                                    return (
+                                        <>
+                                            {/* Banner de Título */}
+                                            <div className={`${searchType === 'sige' ? 'bg-blue-600' : 'bg-violet-600'} text-white p-6 rounded-t-[2rem] shadow-xl relative overflow-hidden group`}>
+                                                <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform">
+                                                    <GraduationCap size={100} />
                                                 </div>
-                                                <div className="flex-1">
-                                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">{campo.label}</p>
-                                                    <p className="text-[13px] font-bold text-slate-700 leading-snug">{campo.resumen || '-'}</p>
+                                                <div className="relative z-10">
+                                                    <h3 className="text-xl font-black uppercase tracking-tighter mb-1">{data.titulo}</h3>
+                                                    <p className={`${searchType === 'sige' ? 'text-blue-100' : 'text-violet-100'} text-[10px] font-bold uppercase tracking-widest opacity-80`}>{data.resumen}</p>
                                                 </div>
                                             </div>
-                                        ))}
-                                    </div>
 
-                                    <button onClick={resetMutations} className="w-full flex items-center justify-center gap-2 py-4 text-[10px] font-black uppercase tracking-widest text-blue-600 hover:bg-blue-50 rounded-xl transition-all active:scale-95">
-                                        <RotateCcw size={14} /> Nueva consulta 
-                                    </button>
-                                </div>
+                                            {/* Mensaje de Confirmación y Datos */}
+                                            <div className="bg-slate-50/50 border-x-2 border-b-2 border-slate-100 rounded-b-[2rem] p-6 pt-8 space-y-6">
+                                                <div className="flex items-center gap-4 p-4 bg-emerald-50 border border-emerald-100 rounded-2xl animate-in zoom-in-95 delay-150">
+                                                    <div className="shrink-0 w-10 h-10 bg-emerald-500 text-white rounded-full flex items-center justify-center shadow-lg shadow-emerald-100">
+                                                        <Check size={20} strokeWidth={3} />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-emerald-900 font-black text-sm uppercase tracking-tight">¡Encontrado!</p>
+                                                        <p className="text-emerald-700/70 text-xs font-bold">El registro figura como válido en el sistema.</p>
+                                                    </div>
+                                                </div>
+
+                                                {/* Lista de Detalles */}
+                                                <div className="space-y-3">
+                                                    {data.campos?.map((campo: any, idx: number) => (
+                                                        <div key={idx} className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-start gap-4">
+                                                            <div className="p-2 bg-slate-50 rounded-lg text-slate-400 group-hover:text-blue-500 transition-colors">
+                                                                {campo.label?.toLowerCase().includes('escuela') ? <MapPin size={16} /> : <User size={16} />}
+                                                            </div>
+                                                            <div className="flex-1">
+                                                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">{campo.label}</p>
+                                                                <p className="text-[13px] font-bold text-slate-700 leading-snug">{campo.resumen || '-'}</p>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+
+                                                <button onClick={resetMutations} className="w-full flex items-center justify-center gap-2 py-4 text-[10px] font-black uppercase tracking-widest text-blue-600 hover:bg-blue-50 rounded-xl transition-all active:scale-95">
+                                                    <RotateCcw size={14} /> Nueva consulta 
+                                                </button>
+                                            </div>
+                                        </>
+                                    );
+                                })()}
                             </div>
                         )}
 
                         {/* ÉXITO LOCAL/UCC */}
-                        {isSuccess && !isSigeMode && (
+                        {isSuccess && (searchType === 'local' || searchType === 'ucc') && (
                             <div className="flex flex-col items-center justify-center py-12 animate-in zoom-in-95 text-center">
                                 <div className="w-20 h-20 bg-emerald-500 text-white rounded-full flex items-center justify-center mb-6 shadow-xl shadow-emerald-200">
                                     <Check size={40} strokeWidth={4} />
